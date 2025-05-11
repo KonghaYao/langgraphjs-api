@@ -139,7 +139,7 @@ function generateEntrypointCode(buildConfig: LanggraphConfig): string {
 import fs from "node:fs";
 import path from "node:path";
 
-const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), "langgraph.json"), "utf8"));
+const config = ${JSON.stringify(buildConfig, null, 2)};
 const schema = {
     cwd: process.cwd(),
     ...config,
@@ -213,8 +213,17 @@ export async function buildLanggraph(
         plugins: [
           nodeExternals({
             deps: false,
+            include: [
+              'cloudflare:sockets',
+              'typescript',
+              'node:fs',
+              'node:path',
+            ],
           }),
         ],
+        define: {
+          global: 'globalThis',
+        },
         build: {
           lib: {
             entry: mainEntries,
@@ -253,6 +262,9 @@ export async function buildLanggraph(
             env: 'node',
           }),
         ],
+        define: {
+          global: 'globalThis',
+        },
         build: {
           target: 'esnext',
           lib: {
