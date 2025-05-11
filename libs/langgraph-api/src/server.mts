@@ -84,7 +84,7 @@ export async function startServer(options: z.infer<typeof StartServerSchema>) {
 
   const cleanup = async () => {
     logger.info(`Flushing to persistent storage, exiting...`);
-    await Promise.all(callbacks.map((c) => c.flush()));
+    await Promise.all(callbacks.map((c) => c?.flush?.()));
   };
 
   logger.info(`Registering graphs from ${options.cwd}`);
