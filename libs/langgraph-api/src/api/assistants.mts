@@ -130,6 +130,7 @@ api.get(
   },
 );
 
+// #if [!PROD]
 api.get(
   "/assistants/:assistant_id/schemas",
   zValidator("json", z.object({ config: RunnableConfigSchema.optional() })),
@@ -165,7 +166,9 @@ api.get(
     });
   },
 );
+// #endif
 
+// #if [!PROD]
 api.get(
   "/assistants/:assistant_id/subgraphs/:namespace?",
   zValidator(
@@ -221,7 +224,7 @@ api.get(
     return c.json(Object.fromEntries(result));
   },
 );
-
+// #endif
 api.post(
   "/assistants/:assistant_id/latest",
   zValidator("json", schemas.AssistantLatestVersion),

@@ -183,10 +183,12 @@ export async function* streamState(
     data: { run_id: run.run_id, attempt },
   };
 
+  // #if [!PROD]
   if (!LANGGRAPH_VERSION) {
     const version = await checkLangGraphSemver();
     LANGGRAPH_VERSION = version.find((v) => v.name === "@langchain/langgraph");
   }
+  // #endif
 
   const metadata = {
     ...kwargs.config?.metadata,

@@ -78,7 +78,7 @@ importers:
         specifier: workspace:*
         version: link:../langgraph-ui
       '@langgraph-js/langgraph-pg':
-        specifier: workspace:*
+        specifier: workspace:^1.1.0
         version: link:../langgraph-pg
       '@types/json-schema':
         specifier: ^7.0.15
@@ -171,6 +171,15 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/node@22.10.5)(lightningcss@1.29.1)
+
+  libs/langgraph-bundler:
+    dependencies:
+      rollup-plugin-node-externals:
+        specifier: ^8.0.0
+        version: 8.0.0(rollup@4.30.0)
+      vite:
+        specifier: ^5.4.18
+        version: 5.4.18(@types/node@22.10.5)(lightningcss@1.29.1)
 
   libs/langgraph-cli:
     dependencies:
@@ -1527,6 +1536,12 @@ packages:
   rimraf@5.0.10:
     resolution: {integrity: sha512-l0OE8wL34P4nJH/H2ffoaniAokM2qSmrtXHmlpvYr5AVVX8msAyW0l8NVJFDxlSK4u3Uh/f41cQheDVdnYijwQ==}
     hasBin: true
+
+  rollup-plugin-node-externals@8.0.0:
+    resolution: {integrity: sha512-2HIOpWsWn5DqBoYl6iCAmB4kd5GoGbF68PR4xKR1YBPvywiqjtYvDEjHFodyqRL51iAMDITP074Zxs0OKs6F+g==}
+    engines: {node: '>= 21 || ^20.6.0 || ^18.19.0'}
+    peerDependencies:
+      rollup: ^4.0.0
 
   rollup@4.30.0:
     resolution: {integrity: sha512-sDnr1pcjTgUT69qBksNF1N1anwfbyYG6TBQ22b03bII8EdiUQ7J0TlozVaTMjT/eEJAO49e1ndV7t+UZfL1+vA==}
@@ -2886,6 +2901,10 @@ snapshots:
   rimraf@5.0.10:
     dependencies:
       glob: 10.4.5
+
+  rollup-plugin-node-externals@8.0.0(rollup@4.30.0):
+    dependencies:
+      rollup: 4.30.0
 
   rollup@4.30.0:
     dependencies:

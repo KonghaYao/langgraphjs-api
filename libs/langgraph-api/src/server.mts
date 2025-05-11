@@ -154,6 +154,7 @@ export async function createHonoServer(
   if (!options.http?.disable_threads) app.route("/", threads);
   if (!options.http?.disable_store) app.route("/", store);
 
+  // #if [!PROD]
   if (options.ui) {
     logger.info(`Registering UI from ${options.cwd}`);
     const { api, registerGraphUi } = await import("./ui/load.mjs");
@@ -163,7 +164,7 @@ export async function createHonoServer(
     });
     app.route("/", api);
   }
-
+  // #endif
   logger.info(`Starting ${options.nWorkers} workers`);
   for (let i = 0; i < options.nWorkers; i++) queue();
 

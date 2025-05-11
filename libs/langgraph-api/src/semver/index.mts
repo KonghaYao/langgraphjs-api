@@ -2,15 +2,14 @@ import * as url from "node:url";
 import * as fs from "node:fs/promises";
 import * as semver from "semver";
 
-const packageJsonPath = url.fileURLToPath(
-  new URL("../../package.json", import.meta.url),
-);
-
 export async function checkSemver(
   packages: { name: string; version: string }[],
 ): Promise<
   { name: string; version: string; required: string; satisfies: boolean }[]
 > {
+  const packageJsonPath = url.fileURLToPath(
+    new URL("../../package.json", import.meta.url),
+  );
   const packageJson = JSON.parse(await fs.readFile(packageJsonPath, "utf-8"));
   const peerDependencies: Record<string, string> =
     packageJson.peerDependencies ?? {};
