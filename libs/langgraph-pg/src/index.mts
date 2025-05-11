@@ -44,7 +44,7 @@ export class PGLangGraphBase extends PostgresSaver implements LangGraphBase {
   async setup() {
     // 执行 postgres.build.sql
     const sql = fs.readFileSync(
-      path.join(__dirname, 'postgres.build.sql'),
+      path.join(__dirname, '../sql/postgres.build.sql'),
       'utf8',
     );
     /** @ts-ignore */
