@@ -47,7 +47,7 @@
     "yaml": "^2.7.0",
     "zod": "^3.23.8",
     "@babel/code-frame": "^7.26.2",
-    "@langchain/langgraph-api": "workspace:*"
+    "@langgraph-js/api": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.3",

@@ -23,5 +23,10 @@
   "keywords": [],
   "devDependencies": {
     "turbo": "^2.4.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
