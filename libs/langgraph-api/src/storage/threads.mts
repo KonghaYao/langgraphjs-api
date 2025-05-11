@@ -424,8 +424,7 @@ export class Threads {
       client.release();
     }
 
-    // 删除checkpoint
-    checkpointer.delete(thread_id, null);
+    // checkpointer.delete(thread_id, null);
 
     return [thread_id];
   }

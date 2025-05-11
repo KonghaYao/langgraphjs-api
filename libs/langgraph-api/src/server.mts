@@ -21,7 +21,7 @@ import { registerAuth } from "./auth/index.mjs";
 import { registerHttp } from "./http/custom.mjs";
 import { cors, ensureContentType } from "./http/middleware.mjs";
 import { bindLoopbackFetch } from "./loopback.mjs";
-import { checkLangGraphSemver } from "./semver/index.mjs";
+// import { checkLangGraphSemver } from "./semver/index.mjs";
 
 export const StartServerSchema = z.object({
   port: z.number(),
@@ -59,21 +59,36 @@ export const StartServerSchema = z.object({
     })
     .optional(),
 });
-
 export async function startServer(options: z.infer<typeof StartServerSchema>) {
-  const semver = await checkLangGraphSemver();
-  const invalidPackages = semver.filter((s) => !s.satisfies);
-  if (invalidPackages.length > 0) {
-    logger.warn(
-      `Some LangGraph.js dependencies are not up to date. Please make sure to update them to the required version.`,
-      Object.fromEntries(
-        invalidPackages.map(({ name, version, required }) => [
-          name,
-          { version, required },
-        ]),
-      ),
-    );
-  }
+  const { app, cleanup } = await createHonoServer(options);
+  return new Promise<{ host: string; cleanup: () => Promise<void> }>(
+    (resolve) => {
+      serve(
+        { fetch: app.fetch, port: options.port, hostname: options.host },
+        (c) => {
+          resolve({ host: `${c.address}:${c.port}`, cleanup });
+        },
+      );
+    },
+  );
+}
+
+export async function createHonoServer(
+  options: z.infer<typeof StartServerSchema>,
+) {
+  // const semver = await checkLangGraphSemver();
+  // const invalidPackages = semver.filter((s) => !s.satisfies);
+  // if (invalidPackages.length > 0) {
+  //   logger.warn(
+  //     `Some LangGraph.js dependencies are not up to date. Please make sure to update them to the required version.`,
+  //     Object.fromEntries(
+  //       invalidPackages.map(({ name, version, required }) => [
+  //         name,
+  //         { version, required },
+  //       ]),
+  //     ),
+  //   );
+  // }
 
   logger.info(`Initializing storage...`);
   const callbacks = await Promise.all([
@@ -151,14 +166,5 @@ export async function startServer(options: z.infer<typeof StartServerSchema>) {
   logger.info(`Starting ${options.nWorkers} workers`);
   for (let i = 0; i < options.nWorkers; i++) queue();
 
-  return new Promise<{ host: string; cleanup: () => Promise<void> }>(
-    (resolve) => {
-      serve(
-        { fetch: app.fetch, port: options.port, hostname: options.host },
-        (c) => {
-          resolve({ host: `${c.address}:${c.port}`, cleanup });
-        },
-      );
-    },
-  );
+  return { app, cleanup };
 }
