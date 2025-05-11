@@ -4,8 +4,10 @@
  * @packageDocumentation
  */
 
+import { LanggraphConfig } from './build.js';
+
 export { buildLanggraph } from './build.js';
-export type { LanggraphConfig } from './build.js';
+export type { LanggraphConfig };
 
 /**
  * 版本号
