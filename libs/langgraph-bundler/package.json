@@ -1,0 +1,57 @@
+{
+  "name": "@langgraph-js/bundler",
+  "version": "1.0.0",
+  "description": "Build tool for LangGraph.js applications that packages graph configurations into deployable modules",
+  "main": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "langgraph-bundler": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/replace-version.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "langgraph",
+    "bundler",
+    "builder",
+    "graph",
+    "llm",
+    "ai"
+  ],
+  "author": "KonghaYao",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KonghaYao/langgraphjs-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KonghaYao/langgraphjs-api/issues"
+  },
+  "homepage": "https://github.com/KonghaYao/langgraphjs-api#readme",
+  "dependencies": {
+    "rollup-plugin-node-externals": "^8.0.0",
+    "vite": "^5.4.18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.2.0",
+    "typescript": "^5.4.2"
+  },
+  "peerDependencies": {
+    "@langgraph-js/api": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
