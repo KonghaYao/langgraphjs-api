@@ -12,7 +12,7 @@ LangGraph Bundler simplifies the process of bundling and deploying LangGraph.js 
 - **Multiple Graph Support**: Builds all graphs defined in your configuration
 - **ES Module Output**: Generates optimized ES modules for modern environments
 - **Development Server**: Includes a development server for testing
-- **Conditional Code**: Supports environment-specific code blocks
+- **Hono Server Support**: Generates a Hono server entrypoint for edge deployment
 - **Seamless Integration**: Works with the LangGraph.js ecosystem
 
 ## Usage
@@ -55,7 +55,7 @@ This will:
 1. Read your `langgraph.json` configuration
 2. Build all defined graphs and authentication handlers
 3. Output the bundled files to your specified `dist` directory
-4. Generate a development server
+4. Generate a development server and Hono server entrypoint
 
 ### Configuration Options
 
@@ -71,7 +71,20 @@ This will:
 You can start the bundled development server:
 
 ```bash
-node dist/dev.js
+node dist/start.js
+```
+
+## Deployment Options
+
+### Edge Deployment with Hono
+
+The bundler generates an `entrypoint.js` file that can be used to deploy your LangGraph application to edge environments like Cloudflare Workers or Deno Deploy:
+
+```javascript
+// Example usage with Cloudflare Workers
+import entrypoint from './dist/entrypoint.js';
+
+export default entrypoint;
 ```
 
 ## Integration with LangGraph.js

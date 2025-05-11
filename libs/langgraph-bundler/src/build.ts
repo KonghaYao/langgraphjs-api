@@ -21,8 +21,13 @@ interface BuildEntries {
   [key: string]: string;
 }
 
+interface HelperEntries {
+  tempDir: string;
+  entries: BuildEntries;
+}
+
 // 常量定义
-const INVALID_AGENT_NAMES = ['auth', 'dev'];
+const INVALID_AGENT_NAMES = ['auth', 'dev', 'start', 'entrypoint'];
 const DEFAULT_DIST_DIR = './dist';
 
 /**
@@ -127,81 +132,51 @@ console.log(process.cwd());
 }
 
 /**
- * 构建主要入口文件
+ * 生成Hono服务器入口点代码
  */
-async function buildMainEntries(
-  entries: BuildEntries,
-  outDir: string,
-): Promise<void> {
-  await build({
-    configFile: false,
-    plugins: [
-      nodeExternals({
-        deps: false,
-      }),
-    ],
-    build: {
-      lib: {
-        entry: entries,
-        formats: ['es'],
-      },
-      outDir,
-      emptyOutDir: false,
-      minify: true,
-      commonjsOptions: {
-        strictRequires: false,
-      },
-      rollupOptions: {
-        output: {
-          preserveModules: false,
-          exports: 'named',
-        },
-      },
-    },
-  });
+function generateEntrypointCode(buildConfig: LanggraphConfig): string {
+  return `import { createHonoServer } from "@langgraph-js/api/server";
+import fs from "node:fs";
+import path from "node:path";
+
+const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), "langgraph.json"), "utf8"));
+const schema = {
+    cwd: process.cwd(),
+    ...config,
+};
+const result = await createHonoServer(schema);
+
+export default {
+    fetch: result.app.fetch,
+};
+`;
 }
 
 /**
- * 构建开发服务器文件
+ * 准备辅助入口文件
  */
-async function buildDevFile(
-  devCode: string,
-  outDir: string,
+function prepareHelperEntries(
+  buildConfig: LanggraphConfig,
   cwd: string,
-): Promise<void> {
-  const tempDevFilePath = path.join(cwd, 'temp-dev.js');
-  fs.writeFileSync(tempDevFilePath, devCode);
-
-  try {
-    await build({
-      configFile: false,
-      mode: 'production',
-      plugins: [
-        nodeExternals({
-          deps: false,
-          include: ['cloudflare:sockets', 'typescript'],
-        }),
-        condition({
-          env: 'node',
-        }),
-        // visualizer(),
-      ],
-      build: {
-        target: 'esnext',
-        lib: {
-          entry: tempDevFilePath,
-          formats: ['es'],
-          fileName: () => 'dev.js',
-        },
-        outDir,
-        emptyOutDir: false,
-        minify: true,
-      },
-    });
-  } finally {
-    // 清理临时文件
-    fs.unlinkSync(tempDevFilePath);
+): HelperEntries {
+  const tempDir = path.join(cwd, '.langgraph-temp');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
   }
+
+  const helperEntries: BuildEntries = {};
+
+  // 创建开发服务器入口文件
+  const startFilePath = path.join(tempDir, 'start.js');
+  fs.writeFileSync(startFilePath, generateDevCode(buildConfig));
+  helperEntries['start'] = startFilePath;
+
+  // 创建Hono服务器入口文件
+  const entrypointFilePath = path.join(tempDir, 'entrypoint.js');
+  fs.writeFileSync(entrypointFilePath, generateEntrypointCode(buildConfig));
+  helperEntries['entrypoint'] = entrypointFilePath;
+
+  return { tempDir, entries: helperEntries };
 }
 
 /**
@@ -212,26 +187,94 @@ export async function buildLanggraph(
 ): Promise<void> {
   console.log(`Building langgraph in ${cwd}...`);
 
-  // 1. 加载配置
-  const config = loadConfig(cwd);
+  try {
+    // 1. 加载配置
+    const config = loadConfig(cwd);
 
-  // 2. 准备输出目录
-  const absoluteDistDir = prepareOutputDirectory(config, cwd);
+    // 2. 准备输出目录
+    const absoluteDistDir = prepareOutputDirectory(config, cwd);
 
-  // 3. 准备入口点
-  const entries = prepareEntries(config, cwd);
+    // 3. 准备主要入口点
+    const mainEntries = prepareEntries(config, cwd);
 
-  // 4. 创建构建配置
-  const buildConfig = createBuildConfig(config);
+    // 4. 创建构建配置
+    const buildConfig = createBuildConfig(config);
 
-  // 5. 生成开发服务器代码
-  const devCode = generateDevCode(buildConfig);
+    // 5. 准备辅助入口文件
+    const { tempDir, entries: helperEntries } = prepareHelperEntries(
+      buildConfig,
+      cwd,
+    );
 
-  // 6. 构建主要入口文件
-  await buildMainEntries(entries, absoluteDistDir);
+    try {
+      // 6. 构建主要图表和认证入口
+      await build({
+        configFile: false,
+        plugins: [
+          nodeExternals({
+            deps: false,
+          }),
+        ],
+        build: {
+          lib: {
+            entry: mainEntries,
+            formats: ['es'],
+          },
+          outDir: absoluteDistDir,
+          emptyOutDir: false,
+          minify: true,
+          commonjsOptions: {
+            strictRequires: false,
+          },
+          rollupOptions: {
+            output: {
+              preserveModules: false,
+              exports: 'named',
+            },
+          },
+        },
+      });
 
-  // 7. 构建开发服务器文件
-  await buildDevFile(devCode, absoluteDistDir, cwd);
+      // 7. 构建辅助入口文件
+      await build({
+        configFile: false,
+        mode: 'production',
+        plugins: [
+          nodeExternals({
+            deps: false,
+            include: [
+              'cloudflare:sockets',
+              'typescript',
+              'node:fs',
+              'node:path',
+            ],
+          }),
+          condition({
+            env: 'node',
+          }),
+        ],
+        build: {
+          target: 'esnext',
+          lib: {
+            entry: helperEntries,
+            formats: ['es'],
+            fileName: (_, entryName) => `${entryName}.js`,
+          },
+          outDir: absoluteDistDir,
+          emptyOutDir: false,
+          minify: true,
+        },
+      });
 
-  console.log(`构建完成。输出目录: ${absoluteDistDir}`);
+      console.log(`构建完成。输出目录: ${absoluteDistDir}`);
+    } finally {
+      // 清理临时目录
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    }
+  } catch (error) {
+    console.error('构建失败:', error);
+    throw error;
+  }
 }
