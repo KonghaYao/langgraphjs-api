@@ -359,6 +359,7 @@ export class Threads {
 
     const now = new Date();
     const values = langchainValuesToStaticJson(options.checkpoint?.values);
+
     let interrupts = {};
     if (options.checkpoint != null) {
       interrupts = options.checkpoint.tasks.reduce<Record<string, unknown>>(
@@ -369,6 +370,7 @@ export class Threads {
         {},
       );
     }
+
     await database.pool.query(
       `UPDATE public.thread
        SET updated_at = $1, status = $2, values = $3, interrupts = $4

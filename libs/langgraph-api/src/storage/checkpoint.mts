@@ -1,4 +1,4 @@
-import { PostgresSaver } from "langgraph-pg";
+import { PostgresSaver } from "@langgraph-js/langgraph-pg";
 import { logger } from "../logging.mjs";
 import { Pool } from "pg";
 

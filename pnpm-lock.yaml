@@ -77,6 +77,9 @@ importers:
       '@langchain/langgraph-ui':
         specifier: workspace:*
         version: link:../langgraph-ui
+      '@langgraph-js/langgraph-pg':
+        specifier: workspace:*
+        version: link:../langgraph-pg
       '@types/json-schema':
         specifier: ^7.0.15
         version: 7.0.15
@@ -98,9 +101,6 @@ importers:
       hono:
         specifier: ^4.5.4
         version: 4.6.16
-      langgraph-pg:
-        specifier: workspace:*
-        version: link:../langgraph-pg
       langsmith:
         specifier: ^0.2.15
         version: 0.2.15

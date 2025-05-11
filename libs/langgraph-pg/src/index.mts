@@ -1,8 +1,5 @@
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
-import {
-  BaseCheckpointSaver,
-  SerializerProtocol,
-} from '@langchain/langgraph-checkpoint';
+import { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import pg from 'pg';
 import fs from 'fs';
 import path from 'path';

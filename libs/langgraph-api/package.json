@@ -60,7 +60,7 @@
     "dotenv": "^16.4.7",
     "exit-hook": "^4.0.0",
     "hono": "^4.5.4",
-    "langgraph-pg": "workspace:*",
+    "@langgraph-js/langgraph-pg": "workspace:*",
     "langsmith": "^0.2.15",
     "open": "^10.1.0",
     "pg": "^8.15.6",
