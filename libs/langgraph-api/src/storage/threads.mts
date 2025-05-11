@@ -14,7 +14,7 @@ import { getGraph } from "../graph/load.mjs";
 import { store } from "./store.mjs";
 import { getLangGraphCommand, type RunCommand } from "../command.mjs";
 import { StateSnapshot } from "@langchain/langgraph";
-import { BaseMessage } from "@langchain/core/messages";
+import { isBaseMessage } from "@langchain/core/messages";
 
 export const langchainValuesToStaticJson = (values: any): any => {
   // 处理null或undefined
@@ -23,7 +23,7 @@ export const langchainValuesToStaticJson = (values: any): any => {
   }
 
   // 处理BaseMessage实例
-  if (values instanceof BaseMessage) {
+  if (isBaseMessage(values)) {
     return { type: values.getType(), ...values._printableFields };
   }
 
