@@ -1,8 +1,8 @@
-import { PostgresSaver } from "@langgraph-js/langgraph-pg";
+import { PGLangGraphBase } from "@langgraph-js/langgraph-pg";
 import { logger } from "../logging.mjs";
 import { Pool } from "pg";
 
-class PGCheckpointSaver extends PostgresSaver {
+class PGCheckpointSaver extends PGLangGraphBase {
   constructor(connString: string, options?: { schema?: string }) {
     const pool = new Pool({ connectionString: connString });
     super(pool, undefined, options);
@@ -57,6 +57,15 @@ class PGCheckpointSaver extends PostgresSaver {
     return "[PGCheckpointSaver]";
   }
 }
-export const checkpointer = new PGCheckpointSaver(process.env.DATABASE_URL!);
 
-// export const checkpointer = new InMemorySaver();
+let checkpointer: PGCheckpointSaver;
+const url = process.env.DATABASE_URL!;
+if (process.env.DATABASE_INIT) {
+  PGCheckpointSaver.setupDatabase(url, process.env.DATABASE_NAME!);
+}
+checkpointer = new PGCheckpointSaver(url);
+if (process.env.DATABASE_INIT) {
+  await checkpointer.setup();
+}
+
+export { checkpointer };

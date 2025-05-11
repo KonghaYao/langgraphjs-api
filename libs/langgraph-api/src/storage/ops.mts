@@ -114,7 +114,7 @@ export const truncate = async (flags: {
   checkpointer?: boolean;
   store?: boolean;
 }) => {
-  const client = await database.pool.connect();
+  const client = await database.getPool().connect();
   try {
     await client.query("BEGIN");
 

@@ -128,7 +128,7 @@ export class Threads {
     query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(options.limit, options.offset);
 
-    const { rows } = await database.pool.query(query, params);
+    const { rows } = await database.getPool().query(query, params);
 
     const total = rows.length > 0 ? parseInt(rows[0].total_count) : 0;
 
@@ -161,10 +161,9 @@ export class Threads {
       thread_id,
     });
 
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.thread WHERE thread_id = $1`,
-      [thread_id],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [thread_id]);
 
     if (rows.length === 0) {
       throw new HTTPException(404, {
@@ -207,10 +206,9 @@ export class Threads {
     });
 
     // 首先检查线程是否存在
-    const { rows: existingRows } = await database.pool.query(
-      `SELECT * FROM public.thread WHERE thread_id = $1`,
-      [thread_id],
-    );
+    const { rows: existingRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [thread_id]);
 
     if (existingRows.length > 0) {
       const existingThread = existingRows[0];
@@ -238,7 +236,7 @@ export class Threads {
     const now = new Date();
 
     // 插入新线程
-    const { rows } = await database.pool.query(
+    const { rows } = await database.getPool().query(
       `INSERT INTO public.thread
       (thread_id, created_at, updated_at, metadata, status, config)
       VALUES ($1, $2, $3, $4, $5, $6)
@@ -270,10 +268,9 @@ export class Threads {
       metadata: options.metadata,
     });
 
-    const { rows: threadRows } = await database.pool.query(
-      `SELECT * FROM public.thread WHERE thread_id = $1`,
-      [threadId],
-    );
+    const { rows: threadRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [threadId]);
 
     if (threadRows.length === 0) {
       throw new HTTPException(404, { message: "Thread not found" });
@@ -295,7 +292,7 @@ export class Threads {
       };
     }
 
-    const { rows } = await database.pool.query(
+    const { rows } = await database.getPool().query(
       `UPDATE public.thread
        SET metadata = $1, updated_at = $2
        WHERE thread_id = $3
@@ -324,10 +321,9 @@ export class Threads {
       exception?: Error;
     },
   ) {
-    const { rows: threadRows } = await database.pool.query(
-      `SELECT * FROM public.thread WHERE thread_id = $1`,
-      [threadId],
-    );
+    const { rows: threadRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [threadId]);
 
     if (threadRows.length === 0) {
       throw new HTTPException(404, { message: "Thread not found" });
@@ -339,7 +335,7 @@ export class Threads {
     }
 
     // 检查是否有待处理的运行
-    const { rows: pendingRuns } = await database.pool.query(
+    const { rows: pendingRuns } = await database.getPool().query(
       `SELECT COUNT(*) as count FROM public.run 
        WHERE thread_id = $1 AND status = 'pending'`,
       [threadId],
@@ -371,7 +367,7 @@ export class Threads {
       );
     }
 
-    await database.pool.query(
+    await database.getPool().query(
       `UPDATE public.thread
        SET updated_at = $1, status = $2, values = $3, interrupts = $4
        WHERE thread_id = $5`,
@@ -387,10 +383,9 @@ export class Threads {
       thread_id,
     });
 
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.thread WHERE thread_id = $1`,
-      [thread_id],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [thread_id]);
 
     if (rows.length === 0) {
       throw new HTTPException(404, {
@@ -407,7 +402,7 @@ export class Threads {
     }
 
     // 开启事务
-    const client = await database.pool.connect();
+    const client = await database.getPool().connect();
     try {
       await client.query("BEGIN");
 
@@ -443,10 +438,9 @@ export class Threads {
       thread_id,
     });
 
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.thread WHERE thread_id = $1`,
-      [thread_id],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [thread_id]);
 
     if (rows.length === 0) {
       throw new HTTPException(409, { message: "Thread not found" });
@@ -463,7 +457,7 @@ export class Threads {
 
     const newMetadata = { ...thread.metadata, thread_id: newThreadId };
 
-    const { rows: newThreadRows } = await database.pool.query(
+    const { rows: newThreadRows } = await database.getPool().query(
       `INSERT INTO public.thread
       (thread_id, created_at, updated_at, metadata, config, status)
       VALUES ($1, $2, $3, $4, $5, $6)
@@ -577,10 +571,12 @@ export class Threads {
       const state = await Threads.State.get(config, { subgraphs: false }, auth);
 
       // 更新线程值
-      await database.pool.query(
-        `UPDATE public.thread SET values = $1 WHERE thread_id = $2`,
-        [state.values, threadId],
-      );
+      await database
+        .getPool()
+        .query(`UPDATE public.thread SET values = $1 WHERE thread_id = $2`, [
+          state.values,
+          threadId,
+        ]);
 
       return { checkpoint: nextConfig.configurable };
     }
@@ -646,10 +642,12 @@ export class Threads {
       const state = await Threads.State.get(config, { subgraphs: false }, auth);
 
       // 更新线程值
-      await database.pool.query(
-        `UPDATE public.thread SET values = $1 WHERE thread_id = $2`,
-        [state.values, threadId],
-      );
+      await database
+        .getPool()
+        .query(`UPDATE public.thread SET values = $1 WHERE thread_id = $2`, [
+          state.values,
+          threadId,
+        ]);
 
       return { checkpoint: nextConfig.configurable };
     }

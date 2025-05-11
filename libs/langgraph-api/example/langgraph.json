@@ -1,0 +1,11 @@
+{
+  "node_version": "20",
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./src/graph.ts:graph"
+  },
+  "env": ".env",
+  "port": 8123,
+  "nWorkers": 1,
+  "host": "0.0.0.0"
+}

@@ -1,6 +1,6 @@
 {
   "name": "@langgraph-js/api",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "type": "module",
   "engines": {
     "node": "^18.19.0 || >=20.16.0"

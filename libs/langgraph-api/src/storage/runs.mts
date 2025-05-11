@@ -135,7 +135,7 @@ export class Runs {
   }> {
     // 获取待处理的运行列表
     const now = new Date();
-    const { rows: pendingRuns } = await database.pool.query(
+    const { rows: pendingRuns } = await database.getPool().query(
       `SELECT * FROM public.run
        WHERE status = 'pending' AND created_at < $1
        ORDER BY created_at ASC`,
@@ -153,10 +153,9 @@ export class Runs {
       const threadId = run.thread_id;
 
       // 验证线程存在
-      const { rows: threadRows } = await database.pool.query(
-        `SELECT * FROM public.thread WHERE thread_id = $1`,
-        [threadId],
-      );
+      const { rows: threadRows } = await database
+        .getPool()
+        .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [threadId]);
 
       if (threadRows.length === 0) {
         console.warn(`Unexpected missing thread in Runs.next: ${threadId}`);
@@ -210,10 +209,11 @@ export class Runs {
     auth: AuthContext | undefined,
   ): Promise<Run[]> {
     // 首先检查assistant是否存在
-    const { rows: assistantRows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistantId],
-    );
+    const { rows: assistantRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistantId,
+      ]);
 
     if (assistantRows.length === 0) {
       throw new HTTPException(404, {
@@ -252,10 +252,9 @@ export class Runs {
     // 检查线程是否存在
     let existingThread = null;
     if (threadId) {
-      const { rows } = await database.pool.query(
-        `SELECT * FROM public.thread WHERE thread_id = $1`,
-        [threadId],
-      );
+      const { rows } = await database
+        .getPool()
+        .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [threadId]);
 
       if (rows.length > 0) {
         existingThread = rows[0];
@@ -267,7 +266,7 @@ export class Runs {
     }
 
     const now = new Date();
-    const client = await database.pool.connect();
+    const client = await database.getPool().connect();
 
     try {
       await client.query("BEGIN");
@@ -454,10 +453,9 @@ export class Runs {
     });
 
     // 获取运行记录
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.run WHERE run_id = $1`,
-      [runId],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.run WHERE run_id = $1`, [runId]);
 
     if (
       rows.length === 0 ||
@@ -470,10 +468,11 @@ export class Runs {
 
     // 如果提供了thread_id，验证权限
     if (filters != null) {
-      const { rows: threadRows } = await database.pool.query(
-        `SELECT * FROM public.thread WHERE thread_id = $1`,
-        [run.thread_id],
-      );
+      const { rows: threadRows } = await database
+        .getPool()
+        .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [
+          run.thread_id,
+        ]);
 
       if (
         threadRows.length === 0 ||
@@ -507,10 +506,9 @@ export class Runs {
     });
 
     // 获取运行记录
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.run WHERE run_id = $1`,
-      [run_id],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.run WHERE run_id = $1`, [run_id]);
 
     if (
       rows.length === 0 ||
@@ -523,10 +521,11 @@ export class Runs {
 
     // 如果提供了thread_id，验证权限
     if (filters != null) {
-      const { rows: threadRows } = await database.pool.query(
-        `SELECT * FROM public.thread WHERE thread_id = $1`,
-        [run.thread_id],
-      );
+      const { rows: threadRows } = await database
+        .getPool()
+        .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [
+          run.thread_id,
+        ]);
 
       if (
         threadRows.length === 0 ||
@@ -537,9 +536,9 @@ export class Runs {
     }
 
     // 删除运行记录
-    await database.pool.query(`DELETE FROM public.run WHERE run_id = $1`, [
-      run_id,
-    ]);
+    await database
+      .getPool()
+      .query(`DELETE FROM public.run WHERE run_id = $1`, [run_id]);
 
     // 如果指定了线程ID，删除相关的检查点
     if (thread_id != null) {
@@ -614,7 +613,7 @@ export class Runs {
 
     let foundRunsCount = 0;
     const promises: Promise<unknown>[] = [];
-    const client = await database.pool.connect();
+    const client = await database.getPool().connect();
 
     try {
       await client.query("BEGIN");
@@ -744,10 +743,9 @@ export class Runs {
 
     // 验证线程权限
     if (filters != null) {
-      const { rows: threadRows } = await database.pool.query(
-        `SELECT * FROM public.thread WHERE thread_id = $1`,
-        [threadId],
-      );
+      const { rows: threadRows } = await database
+        .getPool()
+        .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [threadId]);
 
       if (
         threadRows.length === 0 ||
@@ -765,7 +763,7 @@ export class Runs {
     query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    const { rows } = await database.pool.query(query, params);
+    const { rows } = await database.getPool().query(query, params);
 
     return rows.map((row) => ({
       run_id: row.run_id,
@@ -781,16 +779,15 @@ export class Runs {
   }
 
   static async setStatus(runId: string, status: RunStatus) {
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.run WHERE run_id = $1`,
-      [runId],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.run WHERE run_id = $1`, [runId]);
 
     if (rows.length === 0) {
       throw new Error(`Run ${runId} not found`);
     }
 
-    await database.pool.query(
+    await database.getPool().query(
       `UPDATE public.run 
        SET status = $1, updated_at = $2
        WHERE run_id = $3`,
@@ -817,10 +814,11 @@ export class Runs {
 
       // 验证线程权限
       if (filters != null && threadId != null) {
-        const { rows: threadRows } = await database.pool.query(
-          `SELECT * FROM public.thread WHERE thread_id = $1`,
-          [threadId],
-        );
+        const { rows: threadRows } = await database
+          .getPool()
+          .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [
+            threadId,
+          ]);
 
         if (
           threadRows.length === 0 ||

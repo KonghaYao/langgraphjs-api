@@ -56,7 +56,7 @@ export class Assistants {
     query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(options.limit, options.offset);
 
-    const { rows } = await database.pool.query(query, params);
+    const { rows } = await database.getPool().query(query, params);
 
     for (const row of rows) {
       if (!isAuthMatching(row.metadata, filters)) {
@@ -87,10 +87,11 @@ export class Assistants {
       assistant_id,
     });
 
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     if (rows.length === 0) {
       throw new HTTPException(404, {
@@ -143,10 +144,11 @@ export class Assistants {
     );
 
     // 首先检查助手是否存在
-    const { rows: existingRows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    const { rows: existingRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     if (existingRows.length > 0) {
       const existingAssistant = existingRows[0];
@@ -176,7 +178,7 @@ export class Assistants {
     const version = 1;
 
     // 开启事务
-    const client = await database.pool.connect();
+    const client = await database.getPool().connect();
     try {
       await client.query("BEGIN");
 
@@ -258,10 +260,11 @@ export class Assistants {
     );
 
     // 获取现有助手信息
-    const { rows: assistantRows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    const { rows: assistantRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     if (assistantRows.length === 0) {
       throw new HTTPException(404, { message: "Assistant not found" });
@@ -299,7 +302,7 @@ export class Assistants {
         : assistant.description;
 
     // 开启事务
-    const client = await database.pool.connect();
+    const client = await database.getPool().connect();
     try {
       await client.query("BEGIN");
 
@@ -382,10 +385,11 @@ export class Assistants {
     });
 
     // 首先检查助手是否存在并验证权限
-    const { rows: assistantRows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    const { rows: assistantRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     if (assistantRows.length === 0) {
       throw new HTTPException(404, { message: "Assistant not found" });
@@ -413,7 +417,7 @@ export class Assistants {
     query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(options.limit, options.offset);
 
-    const { rows } = await database.pool.query(query, params);
+    const { rows } = await database.getPool().query(query, params);
 
     return rows.map((row) => ({
       assistant_id: row.assistant_id,
@@ -434,10 +438,11 @@ export class Assistants {
       assistant_id,
     });
 
-    const { rows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    const { rows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     if (rows.length === 0) {
       throw new HTTPException(404, {
@@ -453,10 +458,11 @@ export class Assistants {
       });
     }
 
-    await database.pool.query(
-      `DELETE FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    await database
+      .getPool()
+      .query(`DELETE FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     return [assistant_id];
   }
@@ -471,10 +477,11 @@ export class Assistants {
     });
 
     // 首先检查助手是否存在
-    const { rows: assistantRows } = await database.pool.query(
-      `SELECT * FROM public.assistant WHERE assistant_id = $1`,
-      [assistant_id],
-    );
+    const { rows: assistantRows } = await database
+      .getPool()
+      .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
+        assistant_id,
+      ]);
 
     if (assistantRows.length === 0) {
       throw new HTTPException(404, { message: "Assistant not found" });
@@ -487,7 +494,7 @@ export class Assistants {
     }
 
     // 检查请求的版本是否存在
-    const { rows: versionRows } = await database.pool.query(
+    const { rows: versionRows } = await database.getPool().query(
       `SELECT * FROM public.assistant_versions 
        WHERE assistant_id = $1 AND version = $2`,
       [assistant_id, version],
@@ -503,7 +510,7 @@ export class Assistants {
     const now = new Date();
 
     // 更新助手为指定版本
-    const { rows } = await database.pool.query(
+    const { rows } = await database.getPool().query(
       `UPDATE public.assistant 
        SET config = $1, metadata = $2, updated_at = $3, version = $4, graph_id = $5, name = $6
        WHERE assistant_id = $7

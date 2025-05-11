@@ -1,31 +1,43 @@
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
-import { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import pg from 'pg';
 import fs from 'fs';
 import path from 'path';
 export * from '@langchain/langgraph-checkpoint-postgres';
-export abstract class LangGraphBase {
-  abstract checkpointSaver: BaseCheckpointSaver;
-  abstract setup(): Promise<void>;
-}
+export interface LangGraphBase {}
 
-export class PGLangGraphBase extends LangGraphBase {
-  checkpointSaver: PostgresSaver;
-  pool: pg.Pool;
-  constructor(urlOrSaver?: string | PostgresSaver) {
-    super();
-    this.checkpointSaver =
-      urlOrSaver instanceof PostgresSaver
-        ? urlOrSaver
-        : typeof urlOrSaver === 'string'
-        ? PostgresSaver.fromConnString(urlOrSaver)
-        : PostgresSaver.fromConnString(process.env.DATABASE_URL!);
-    /** @ts-ignore */
-    this.pool = this.checkpointSaver.pool;
+export class PGLangGraphBase extends PostgresSaver implements LangGraphBase {
+  static async setupDatabase(uri: string, databaseName: string) {
+    const url = new URL(uri);
+    const initURL = new URL(url);
+    initURL.pathname = '';
+    // 连接到默认数据库postgres
+    const pool = new pg.Pool({
+      connectionString: initURL.toString(),
+      database: 'postgres', // 连接到默认数据库
+    });
+
+    try {
+      // 检查数据库是否存在
+      const result = await pool.query(
+        `SELECT 1 FROM pg_database WHERE datname = $1`,
+        [databaseName],
+      );
+
+      // 如果数据库不存在，则创建
+      if (result.rows.length === 0) {
+        await pool.query(`CREATE DATABASE ${databaseName}`);
+      }
+    } finally {
+      // 关闭连接池
+      await pool.end();
+    }
   }
 
+  getPool(): pg.Pool {
+    /** @ts-ignore */
+    return this.pool;
+  }
   async setup() {
-    await this.createDatabase(process.env.DATABASE_NAME!);
     // 执行 postgres.build.sql
     const sql = fs.readFileSync(
       path.join(
@@ -34,10 +46,7 @@ export class PGLangGraphBase extends LangGraphBase {
       ),
       'utf8',
     );
+    /** @ts-ignore */
     await this.pool.query(sql);
-  }
-  // 先创建数据库，然后再进行 setup
-  private createDatabase(databaseName: string) {
-    return this.pool.query(`CREATE DATABASE IF NOT EXISTS ${databaseName}`);
   }
 }
