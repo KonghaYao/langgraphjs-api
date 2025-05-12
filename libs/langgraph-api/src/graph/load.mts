@@ -57,17 +57,20 @@ export async function registerFromEnv(
       GRAPHS[graphId] = resolved;
       GRAPH_SPEC[graphId] = spec;
 
-      await Assistants.put(
-        uuid.v5(graphId, NAMESPACE_GRAPH),
-        {
-          graph_id: graphId,
-          metadata: { created_by: "system" },
-          config: config ?? {},
-          if_exists: "do_nothing",
-          name: graphId,
-        },
-        undefined,
-      );
+      // 默认初始化需要和数据库链接，如果需要关闭，可以设置 DISABLE_AGENT_INIT=true
+      if (!process.env.DISABLE_AGENT_INIT) {
+        await Assistants.put(
+          uuid.v5(graphId, NAMESPACE_GRAPH),
+          {
+            graph_id: graphId,
+            metadata: { created_by: "system" },
+            config: config ?? {},
+            if_exists: "do_nothing",
+            name: graphId,
+          },
+          undefined,
+        );
+      }
 
       return resolved;
     }),

@@ -23,10 +23,17 @@ import { cors, ensureContentType } from "./http/middleware.mjs";
 import { bindLoopbackFetch } from "./loopback.mjs";
 // import { checkLangGraphSemver } from "./semver/index.mjs";
 
+const ensureNumber = (value?: string | number) => {
+  if (typeof value === "string") {
+    const parsed = parseInt(value);
+    return isNaN(parsed) ? undefined : parsed;
+  }
+  return value;
+};
 export const StartServerSchema = z.object({
-  port: z.number(),
-  nWorkers: z.number(),
-  host: z.string(),
+  port: z.number().default(ensureNumber(process.env.PORT) || 8123),
+  nWorkers: z.number().default(ensureNumber(process.env.N_WORKERS) || 1),
+  host: z.string().default(process.env.HOST || "0.0.0.0"),
   cwd: z.string(),
   graphs: z.record(z.string()),
   auth: z
@@ -76,6 +83,7 @@ export async function startServer(options: z.infer<typeof StartServerSchema>) {
 export async function createHonoServer(
   options: z.infer<typeof StartServerSchema>,
 ) {
+  options = StartServerSchema.parse(options);
   // const semver = await checkLangGraphSemver();
   // const invalidPackages = semver.filter((s) => !s.satisfies);
   // if (invalidPackages.length > 0) {
