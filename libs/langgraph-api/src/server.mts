@@ -67,6 +67,7 @@ export const StartServerSchema = z.object({
     .optional(),
 });
 export async function startServer(options: z.infer<typeof StartServerSchema>) {
+  options = StartServerSchema.parse(options);
   const { app, cleanup } = await createHonoServer(options);
   return new Promise<{ host: string; cleanup: () => Promise<void> }>(
     (resolve) => {
