@@ -47,7 +47,6 @@ export class PGLangGraphBase extends PostgresSaver implements LangGraphBase {
       path.join(__dirname, '../sql/postgres.build.sql'),
       'utf8',
     );
-    /** @ts-ignore */
-    await this.pool.query(sql);
+    await this.getPool().query(sql);
   }
 }

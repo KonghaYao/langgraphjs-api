@@ -213,12 +213,7 @@ export async function buildLanggraph(
         plugins: [
           nodeExternals({
             deps: false,
-            include: [
-              'cloudflare:sockets',
-              'typescript',
-              'node:fs',
-              'node:path',
-            ],
+            include: ['cloudflare:sockets', 'typescript'],
           }),
         ],
         define: {
@@ -251,12 +246,7 @@ export async function buildLanggraph(
         plugins: [
           nodeExternals({
             deps: false,
-            include: [
-              'cloudflare:sockets',
-              'typescript',
-              'node:fs',
-              'node:path',
-            ],
+            include: ['cloudflare:sockets', 'typescript'],
           }),
           condition({
             env: 'node',
