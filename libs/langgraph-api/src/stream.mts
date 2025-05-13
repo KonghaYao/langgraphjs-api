@@ -14,6 +14,7 @@ import {
 import { BaseMessageChunk, isBaseMessage } from "@langchain/core/messages";
 import { getLangGraphCommand } from "./command.mjs";
 import { checkLangGraphSemver } from "./semver/index.mjs";
+import { resolveCallbacks } from "./callback/callback.js";
 
 type LangGraphStreamMode = Pregel<any, any>["streamMode"][number];
 
@@ -199,6 +200,7 @@ export async function* streamState(
     langgraph_api_url: process.env.LANGGRAPH_API_URL ?? undefined,
   };
 
+  const callbacks = await resolveCallbacks();
   const events = graph.streamEvents(
     kwargs.command != null
       ? getLangGraphCommand(kwargs.command)
@@ -214,6 +216,7 @@ export async function* streamState(
       recursionLimit: kwargs.config?.recursion_limit,
       subgraphs: kwargs.subgraphs,
       metadata,
+      callbacks,
 
       runId: run.run_id,
       streamMode: [...libStreamMode],
