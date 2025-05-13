@@ -14,7 +14,7 @@ import {
 import { BaseMessageChunk, isBaseMessage } from "@langchain/core/messages";
 import { getLangGraphCommand } from "./command.mjs";
 import { checkLangGraphSemver } from "./semver/index.mjs";
-import { callbacks, resolveCallbacks } from "./storage/callback.js";
+import { callbacks } from "./storage/callback.js";
 
 type LangGraphStreamMode = Pregel<any, any>["streamMode"][number];
 

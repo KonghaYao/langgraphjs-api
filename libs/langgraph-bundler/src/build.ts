@@ -15,6 +15,9 @@ export interface LanggraphConfig {
     path: string;
   };
   dist?: string;
+  callbacks?: {
+    path: string;
+  };
 }
 
 interface BuildEntries {
@@ -27,7 +30,7 @@ interface HelperEntries {
 }
 
 // 常量定义
-const INVALID_AGENT_NAMES = ['auth', 'dev', 'start', 'entrypoint'];
+const INVALID_AGENT_NAMES = ['auth', 'dev', 'start', 'entrypoint', 'callbacks'];
 const DEFAULT_DIST_DIR = './dist';
 
 /**
@@ -82,6 +85,10 @@ function prepareEntries(config: LanggraphConfig, cwd: string): BuildEntries {
     const [filePath] = config.auth.path.split(':');
     entries['auth'] = path.resolve(cwd, filePath);
   }
+  if (config.callbacks?.path) {
+    const filePath = config.callbacks.path;
+    entries['callbacks'] = path.resolve(cwd, filePath);
+  }
 
   return entries;
 }
@@ -110,6 +117,10 @@ function createBuildConfig(config: LanggraphConfig): LanggraphConfig {
   if (buildConfig.auth?.path) {
     const [_, exportName] = buildConfig.auth.path.split(':');
     buildConfig.auth.path = `./auth.js:${exportName || 'auth'}`;
+  }
+
+  if (buildConfig.callbacks?.path) {
+    buildConfig.callbacks.path = `./callbacks.js`;
   }
 
   return buildConfig;

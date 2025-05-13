@@ -4,6 +4,9 @@
   "graphs": {
     "agent": "./src/graph.ts:graph"
   },
+  "callbacks": {
+    "path": "./src/callbacks.ts"
+  },
   "env": ".env",
   "port": 8123,
   "nWorkers": 1,

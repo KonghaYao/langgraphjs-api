@@ -66,6 +66,11 @@ export const StartServerSchema = z.object({
         .optional(),
     })
     .optional(),
+  callbacks: z
+    .object({
+      path: z.string(),
+    })
+    .optional(),
 });
 export async function startServer(options: z.infer<typeof StartServerSchema>) {
   options = StartServerSchema.parse(options);
