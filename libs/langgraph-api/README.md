@@ -1,3 +1,3 @@
 # LangGraph.js API
 
-In-memory implementation of the LangGraph.js API.
+PostgreSQL implementation of the LangGraph.js API.

@@ -21,6 +21,7 @@ import { registerAuth } from "./auth/index.mjs";
 import { registerHttp } from "./http/custom.mjs";
 import { cors, ensureContentType } from "./http/middleware.mjs";
 import { bindLoopbackFetch } from "./loopback.mjs";
+import { callbacks as globalCallbacks } from "./storage/callback.js";
 // import { checkLangGraphSemver } from "./semver/index.mjs";
 
 const ensureNumber = (value?: string | number) => {
@@ -104,6 +105,7 @@ export async function createHonoServer(
     opsConn.initialize(options.cwd),
     checkpointer.initialize(options.cwd),
     graphStore.initialize(options.cwd),
+    globalCallbacks.initialize(options),
   ]);
 
   const cleanup = async () => {
