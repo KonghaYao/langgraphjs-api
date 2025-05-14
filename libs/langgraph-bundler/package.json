@@ -1,6 +1,6 @@
 {
   "name": "@langgraph-js/bundler",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Build tool for LangGraph.js applications that packages graph configurations into deployable modules",
   "main": "dist/index.js",
   "type": "module",
@@ -46,7 +46,7 @@
     "typescript": "^5.4.2"
   },
   "peerDependencies": {
-    "@langgraph-js/api": "^1.0.0"
+    "@langgraph-js/api": "^0.2.39"
   },
   "engines": {
     "node": ">=18.0.0"
