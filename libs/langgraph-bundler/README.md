@@ -14,6 +14,7 @@ LangGraph Bundler simplifies the process of bundling and deploying LangGraph.js 
 - **Development Server**: Includes a development server for testing
 - **Hono Server Support**: Generates a Hono server entrypoint for edge deployment
 - **Seamless Integration**: Works with the LangGraph.js ecosystem
+- **Multi-Runtime Support**: Supports Bun, Deno, and Node.js environments
 
 ## Usage
 
@@ -68,7 +69,24 @@ This will:
 
 ## Development
 
-You can start the bundled development server:
+### Development Server
+
+You can start the development server using the `langgraph-dev` command:
+
+```bash
+npx langgraph-dev
+```
+
+The development server automatically detects your runtime environment (Bun or Node.js) and starts the appropriate server configuration.
+
+#### Runtime Behavior
+
+- **Bun**: Uses `bunx --bun langgraph-dev`
+- **Node.js**: Uses `npx langgraph-dev`
+
+### Manual Server Start
+
+You can also start the bundled development server manually:
 
 ```bash
 node dist/start.js
