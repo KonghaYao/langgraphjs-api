@@ -231,6 +231,7 @@ export async function buildLanggraph(
           global: 'globalThis',
         },
         build: {
+          target: 'esnext',
           lib: {
             entry: mainEntries,
             formats: ['es'],
