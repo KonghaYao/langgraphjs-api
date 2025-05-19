@@ -1,0 +1,15 @@
+{
+  "node_version": "20",
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "../langgraph-api/example/src/graph.ts:graph",
+    "b-agent": "../langgraph-api/example/src/graph.ts:graph"
+  },
+  "callbacks": {
+    "path": "../langgraph-api/example/src/callbacks.ts"
+  },
+  "env": ".env",
+  "port": 8123,
+  "nWorkers": 1,
+  "host": "0.0.0.0"
+}

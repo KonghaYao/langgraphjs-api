@@ -16,6 +16,7 @@ const schema = {
 const agentString = process.argv
   .find((arg) => arg.startsWith('--agent='))
   ?.split('=')[1];
+console.log(agentString);
 const result = await startServer(filterGraphs(schema, agentString));
 console.log('LangGraph is running on http://' + result.host);
 console.log(process.cwd());

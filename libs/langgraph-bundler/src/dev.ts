@@ -76,12 +76,16 @@ async function main(): Promise<void> {
   const runtime = detectRuntime();
   console.log(`检测到运行环境: ${runtime}`);
 
+  // 获取所有命令行参数
+  const args = process.argv.slice(2);
+
   switch (runtime) {
     case 'bun':
       executeCommand('bun', [
         'run',
         '--watch',
         path.join(__dirname, 'dev-node.js'),
+        ...args,
       ]);
       break;
     case 'deno':
@@ -94,15 +98,15 @@ async function main(): Promise<void> {
         '8123',
         '--watch',
         path.join(__dirname, 'dev-edge.js'),
+        ...args,
       ]);
       break;
     case 'node':
-      // 对于 Node 环境，这里可以添加默认行为
-      // 例如使用 node 的 --watch 参数（Node.js v18.11.0+ 支持）
       executeCommand('tsx', [
         'watch',
         '--env-file=.env',
         path.join(__dirname, 'dev-node.js'),
+        ...args,
       ]);
       break;
     default:
