@@ -1,6 +1,6 @@
 {
   "name": "@langchain/langgraph-cli",
-  "version": "0.0.35",
+  "version": "0.0.37",
   "type": "module",
   "engines": {
     "node": "^18.19.0 || >=20.16.0"
@@ -21,7 +21,7 @@
   "scripts": {
     "clean": "npx -y bun scripts/clean.mjs",
     "build": "npx -y bun scripts/build.mjs",
-    "prepack": "pnpm run build",
+    "prepack": "yarn run build",
     "typecheck": "tsc --noEmit",
     "cli": "tsx src/cli/cli.mts",
     "cli:watch": "tsx watch src/cli/cli.mts",
@@ -30,7 +30,9 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@babel/code-frame": "^7.26.2",
     "@commander-js/extra-typings": "^13.0.0",
+    "@langchain/langgraph-api": "workspace:*",
     "chokidar": "^4.0.3",
     "commander": "^13.0.0",
     "dedent": "^1.5.3",
@@ -50,11 +52,11 @@
     "@langgraph-js/api": "workspace:*"
   },
   "devDependencies": {
-    "tsx": "^4.19.3",
     "@types/babel__code-frame": "^7.0.6",
     "@types/node": "^22.2.0",
     "prettier": "^3.3.3",
-    "vitest": "^3.0.5",
-    "typescript": "^5.5.4"
+    "tsx": "^4.19.3",
+    "typescript": "^5.5.4",
+    "vitest": "^3.0.5"
   }
 }

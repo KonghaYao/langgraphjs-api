@@ -65,6 +65,8 @@ export interface RunKwargs {
   config?: RunnableConfig;
 
   subgraphs?: boolean;
+  resumable?: boolean;
+
   temporary?: boolean;
 
   // TODO: implement webhook
