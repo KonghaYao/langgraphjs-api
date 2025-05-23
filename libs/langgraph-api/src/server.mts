@@ -86,7 +86,7 @@ export async function startServer(options: z.infer<typeof StartServerSchema>) {
     },
   );
 }
-
+export { logger };
 export async function createHonoServer(
   options: z.infer<typeof StartServerSchema>,
 ) {
