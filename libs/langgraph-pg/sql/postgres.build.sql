@@ -58,7 +58,7 @@ CREATE TABLE public.assistant (
 );
 
 
-ALTER TABLE public.assistant OWNER TO postgres;
+
 
 --
 -- Name: assistant_versions; Type: TABLE; Schema: public; Owner: postgres
@@ -75,7 +75,7 @@ CREATE TABLE public.assistant_versions (
 );
 
 
-ALTER TABLE public.assistant_versions OWNER TO postgres;
+
 
 --
 -- Name: checkpoint_blobs; Type: TABLE; Schema: public; Owner: postgres
@@ -91,7 +91,7 @@ CREATE TABLE public.checkpoint_blobs (
 );
 
 
-ALTER TABLE public.checkpoint_blobs OWNER TO postgres;
+
 
 --
 -- Name: checkpoint_migrations; Type: TABLE; Schema: public; Owner: postgres
@@ -102,7 +102,7 @@ CREATE TABLE public.checkpoint_migrations (
 );
 
 
-ALTER TABLE public.checkpoint_migrations OWNER TO postgres;
+
 
 --
 -- Name: checkpoint_writes; Type: TABLE; Schema: public; Owner: postgres
@@ -120,7 +120,7 @@ CREATE TABLE public.checkpoint_writes (
 );
 
 
-ALTER TABLE public.checkpoint_writes OWNER TO postgres;
+
 
 --
 -- Name: checkpoints; Type: TABLE; Schema: public; Owner: postgres
@@ -137,7 +137,7 @@ CREATE TABLE public.checkpoints (
 );
 
 
-ALTER TABLE public.checkpoints OWNER TO postgres;
+
 
 --
 -- Name: cron; Type: TABLE; Schema: public; Owner: postgres
@@ -158,7 +158,7 @@ CREATE TABLE public.cron (
 );
 
 
-ALTER TABLE public.cron OWNER TO postgres;
+
 
 --
 -- Name: run; Type: TABLE; Schema: public; Owner: postgres
@@ -178,7 +178,7 @@ CREATE TABLE public.run (
 WITH (autovacuum_vacuum_scale_factor='0.01', autovacuum_vacuum_threshold='50', autovacuum_analyze_scale_factor='0.01', autovacuum_analyze_threshold='50');
 
 
-ALTER TABLE public.run OWNER TO postgres;
+
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
@@ -190,7 +190,7 @@ CREATE TABLE public.schema_migrations (
 );
 
 
-ALTER TABLE public.schema_migrations OWNER TO postgres;
+
 
 --
 -- Name: store; Type: TABLE; Schema: public; Owner: postgres
@@ -207,7 +207,7 @@ CREATE TABLE public.store (
 );
 
 
-ALTER TABLE public.store OWNER TO postgres;
+
 
 --
 -- Name: thread; Type: TABLE; Schema: public; Owner: postgres
@@ -225,7 +225,7 @@ CREATE TABLE public.thread (
 );
 
 
-ALTER TABLE public.thread OWNER TO postgres;
+
 
 --
 -- Name: thread_ttl; Type: TABLE; Schema: public; Owner: postgres
@@ -242,7 +242,7 @@ CREATE TABLE public.thread_ttl (
 );
 
 
-ALTER TABLE public.thread_ttl OWNER TO postgres;
+
 
 --
 -- Name: assistant assistant_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres

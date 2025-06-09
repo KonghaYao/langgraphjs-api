@@ -17,7 +17,6 @@ export class PGLangGraphBase extends PostgresSaver implements LangGraphBase {
     // 连接到默认数据库postgres
     const pool = new pg.Pool({
       connectionString: initURL.toString(),
-      database: 'postgres', // 连接到默认数据库
     });
 
     try {
@@ -30,23 +29,28 @@ export class PGLangGraphBase extends PostgresSaver implements LangGraphBase {
       // 如果数据库不存在，则创建
       if (result.rows.length === 0) {
         await pool.query(`CREATE DATABASE ${databaseName}`);
+        console.log('create database success', databaseName);
+        const setupPool = new pg.Pool({
+          connectionString: uri,
+        });
+        await this.setup(setupPool);
       }
     } finally {
       // 关闭连接池
       await pool.end();
     }
   }
-
   getPool(): pg.Pool {
     /** @ts-ignore */
     return this.pool;
   }
-  async setup() {
+  static async setup(pool: pg.Pool) {
     // 执行 postgres.build.sql
     const sql = fs.readFileSync(
       path.join(__dirname, '../sql/postgres.build.sql'),
       'utf8',
     );
-    await this.getPool().query(sql);
+    await pool.query(sql);
+    console.log('setup database success');
   }
 }
