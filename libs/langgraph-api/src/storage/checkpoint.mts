@@ -64,8 +64,5 @@ if (process.env.DATABASE_INIT) {
   PGCheckpointSaver.setupDatabase(url, process.env.DATABASE_NAME!);
 }
 checkpointer = new PGCheckpointSaver(url);
-if (process.env.DATABASE_INIT) {
-  await checkpointer.setup();
-}
 
 export { checkpointer };

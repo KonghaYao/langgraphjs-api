@@ -131,14 +131,19 @@ function createBuildConfig(config: LanggraphConfig): LanggraphConfig {
  */
 function generateDevCode(buildConfig: LanggraphConfig): string {
   return `import { startServer } from "@langgraph-js/api/server";
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const config = ${JSON.stringify(buildConfig, null, 2)};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const cwd = __dirname;
 const result = await startServer({
-    cwd: process.cwd(),
+    cwd,
     ...config,
 });
 console.log("LangGraph is running on http://" + result.host);
-console.log(process.cwd());
+console.log(cwd);
 `;
 }
 
@@ -147,12 +152,15 @@ console.log(process.cwd());
  */
 function generateEntrypointCode(buildConfig: LanggraphConfig): string {
   return `import { createHonoServer } from "@langgraph-js/api/server";
-import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from 'node:url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const cwd = __dirname;
 const config = ${JSON.stringify(buildConfig, null, 2)};
 const schema = {
-    cwd: process.cwd(),
+    cwd,
     ...config,
 };
 const result = await createHonoServer(schema);
