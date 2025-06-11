@@ -137,7 +137,7 @@ import { fileURLToPath } from 'node:url';
 const config = ${JSON.stringify(buildConfig, null, 2)};
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const cwd = __dirname;
+const cwd = process.env.LANGGRAPH_CWD || __dirname;
 const result = await startServer({
     cwd,
     ...config,
@@ -157,7 +157,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const cwd = __dirname;
+const cwd = process.env.LANGGRAPH_CWD || __dirname;
 const config = ${JSON.stringify(buildConfig, null, 2)};
 const schema = {
     cwd,
