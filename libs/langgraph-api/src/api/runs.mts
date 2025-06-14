@@ -391,7 +391,6 @@ api.post(
       auth: c.var.auth,
       headers: c.req.raw.headers,
     });
-
     c.header("Content-Location", `/threads/${thread_id}/runs/${run.run_id}`);
     return waitKeepAlive(c, Runs.join(run.run_id, thread_id, c.var.auth));
   },

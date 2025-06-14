@@ -40,15 +40,11 @@ export class FileSystemPersistence<Schema> {
   async initialize(cwd: string) {
     this.filepath = path.resolve(cwd, ".langgraph_api", `${this.name}`);
 
-    try {
-      this.data = await deserialize(await fs.readFile(this.filepath, "utf-8"));
-    } catch {
-      this.data = this.defaultSchema();
-    }
+    this.data = this.defaultSchema();
 
-    await fs
-      .mkdir(path.dirname(this.filepath), { recursive: true })
-      .catch(() => void 0);
+    // await fs
+    //   .mkdir(path.dirname(this.filepath), { recursive: true })
+    //   .catch(() => void 0);
 
     return this;
   }

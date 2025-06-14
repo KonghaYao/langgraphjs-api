@@ -25,7 +25,7 @@ export class Assistants {
       offset: number;
     },
     auth: AuthContext | undefined,
-  ): AsyncGenerator<Assistant> {
+  ): AsyncGenerator<{ assistant: Assistant; total: number }> {
     const [filters] = await handleAuthEvent(auth, "assistants:search", {
       graph_id: options.graph_id,
       metadata: options.metadata,
@@ -75,7 +75,7 @@ export class Assistants {
         description: row.description,
       };
 
-      yield assistant;
+      yield { assistant, total: rows.length };
     }
   }
 
@@ -137,12 +137,14 @@ export class Assistants {
       "assistants:create",
       {
         assistant_id,
+        config: options.config,
         graph_id: options.graph_id,
         metadata: options.metadata,
         if_exists: options.if_exists,
+        name: options.name,
       },
     );
-
+    const graphName = options.name || options.graph_id;
     // 首先检查助手是否存在
     const { rows: existingRows } = await database
       .getPool()
@@ -196,7 +198,7 @@ export class Assistants {
           version,
           options.config ?? {},
           mutable?.metadata ?? {},
-          options.name,
+          graphName,
           options.description,
         ],
       );
@@ -213,7 +215,7 @@ export class Assistants {
           options.config ?? {},
           mutable?.metadata ?? {},
           now,
-          options.name,
+          graphName,
         ],
       );
 
@@ -276,8 +278,18 @@ export class Assistants {
       throw new HTTPException(404, { message: "Assistant not found" });
     }
 
+    // 查询所有已存在的版本，获取最大版本号
+    const { rows: versionRows } = await database
+      .getPool()
+      .query(
+        `SELECT MAX(version) as max_version FROM public.assistant_versions WHERE assistant_id = $1`,
+        [assistant_id],
+      );
+
+    const maxExistingVersion = versionRows[0]?.max_version || 0;
+    const newVersion = Math.max(maxExistingVersion, assistant.version) + 1;
+
     const now = new Date();
-    const newVersion = assistant.version + 1;
 
     // 准备更新数据
     let updatedMetadata = assistant.metadata;
@@ -323,21 +335,46 @@ export class Assistants {
         ],
       );
 
-      // 添加新版本记录
-      await client.query(
-        `INSERT INTO public.assistant_versions
-        (assistant_id, version, graph_id, config, metadata, created_at, name)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [
-          assistant_id,
-          newVersion,
-          assistant.graph_id,
-          updatedConfig,
-          updatedMetadata,
-          now,
-          updatedName,
-        ],
+      // 检查版本记录是否已存在
+      const { rows: existingVersionRows } = await client.query(
+        `SELECT * FROM public.assistant_versions 
+         WHERE assistant_id = $1 AND version = $2`,
+        [assistant_id, newVersion],
       );
+
+      if (existingVersionRows.length > 0) {
+        // 如果版本已存在，则更新
+        await client.query(
+          `UPDATE public.assistant_versions
+           SET graph_id = $1, config = $2, metadata = $3, created_at = $4, name = $5
+           WHERE assistant_id = $6 AND version = $7`,
+          [
+            assistant.graph_id,
+            updatedConfig,
+            updatedMetadata,
+            now,
+            updatedName,
+            assistant_id,
+            newVersion,
+          ],
+        );
+      } else {
+        // 如果版本不存在，则插入新版本记录
+        await client.query(
+          `INSERT INTO public.assistant_versions
+          (assistant_id, version, graph_id, config, metadata, created_at, name)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            assistant_id,
+            newVersion,
+            assistant.graph_id,
+            updatedConfig,
+            updatedMetadata,
+            now,
+            updatedName,
+          ],
+        );
+      }
 
       await client.query("COMMIT");
 

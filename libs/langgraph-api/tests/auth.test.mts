@@ -34,21 +34,27 @@ it("unauthenticated user", async () => {
 
 it("create assistant with forbidden scopes", async () => {
   let user = await createJwtClient("johndoe");
-  await expect(user.assistants.create({ graphId: "agent" })).rejects.toThrow(
-    "HTTP 403",
-  );
+  const assistantId = Math.random().toString(36).substring(2, 15);
+  await expect(
+    user.assistants.create({ graphId: "agent" + assistantId }),
+  ).rejects.toThrow("HTTP 403");
 
   user = await createJwtClient("johndoe", ["foo"]);
-  await expect(user.assistants.create({ graphId: "agent" })).rejects.toThrow(
-    "HTTP 403",
-  );
+  await expect(
+    user.assistants.create({ graphId: "agent" + assistantId }),
+  ).rejects.toThrow("HTTP 403");
 
   user = await createJwtClient("johndoe", ["assistants:write"]);
-  await user.assistants.create({ graphId: "agent" });
+  const assistant = await user.assistants.create({
+    graphId: "agent" + assistantId,
+  });
 
-  const fetched = await user.assistants.search({ graphId: "agent" });
+  const fetched = await user.assistants.search({
+    graphId: "agent" + assistantId,
+  });
   expect(fetched).toHaveLength(1);
   expect(fetched).toMatchObject([{ metadata: { owner: "johndoe" } }]);
+  user.assistants.delete(assistant.assistant_id);
 });
 
 it("get thread history from unauthorized user", async () => {
@@ -590,8 +596,7 @@ it("thread copy authorization", async () => {
   const owner = await createJwtClient("johndoe", ["me"]);
   const otherUser = await createJwtClient("alice", ["me"]);
 
-  const thread = await owner.threads.create();
-
+  const thread = await owner.threads.create({ graphId: "agent" });
   // Other user can't copy the thread
   await expect(otherUser.threads.copy(thread.thread_id)).rejects.toThrow(
     "HTTP 409",

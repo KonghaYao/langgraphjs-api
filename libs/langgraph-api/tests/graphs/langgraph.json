@@ -16,6 +16,7 @@
     "app": "./http.mts:app"
   },
   "env": {
-    "LANGGRAPH_CONFIG": "{\"agent\": {\"configurable\": {\"model_name\": \"openai\"}}}"
+    "LANGGRAPH_CONFIG": "{\"agent\": {\"configurable\": {\"model_name\": \"openai\"}}}",
+    "DATABASE_URL": "postgres://postgres:postgres@localhost:5434/langgraph_test_1?sslmode=disable"
   }
 }

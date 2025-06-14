@@ -54,7 +54,7 @@ api.post(
         graph_id: payload.graph_id,
         metadata: payload.metadata ?? {},
         if_exists: payload.if_exists ?? "raise",
-        name: payload.name ?? "Untitled",
+        name: payload.name,
       },
       c.var.auth,
     );

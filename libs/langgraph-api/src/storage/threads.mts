@@ -130,14 +130,23 @@ export class Threads {
 
     const { rows } = await database.getPool().query(query, params);
 
-    const total = rows.length > 0 ? parseInt(rows[0].total_count) : 0;
+    // 获取数据库中的总记录数（未经权限过滤）
+    const dbTotal = rows.length > 0 ? parseInt(rows[0].total_count) : 0;
 
-    for (const row of rows) {
-      // 检查权限
-      if (!isAuthMatching(row.metadata, filters)) {
-        continue;
-      }
+    // 过滤有权限访问的记录
+    const filteredRows = rows.filter((row) =>
+      isAuthMatching(row.metadata, filters),
+    );
 
+    // 如果有权限过滤，需要调整总数
+    // 这里我们计算过滤率，然后应用到总数上
+    let total = dbTotal;
+    if (rows.length > 0 && filteredRows.length < rows.length) {
+      const filterRatio = filteredRows.length / rows.length;
+      total = Math.floor(dbTotal * filterRatio);
+    }
+
+    for (const row of filteredRows) {
       const thread: Thread = {
         thread_id: row.thread_id,
         created_at: row.created_at,
@@ -342,7 +351,7 @@ export class Threads {
     );
 
     const hasPendingRuns = parseInt(pendingRuns[0].count) > 0;
-
+    console.log(pendingRuns);
     let status: ThreadStatus = "idle";
 
     if (options.exception != null) {
@@ -458,16 +467,38 @@ export class Threads {
 
     const { rows: newThreadRows } = await database.getPool().query(
       `INSERT INTO public.thread
-      (thread_id, created_at, updated_at, metadata, config, status)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (thread_id, created_at, updated_at, metadata, config, status,values)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *`,
-      [newThreadId, now, now, newMetadata, {}, "idle"],
+      [
+        newThreadId,
+        now,
+        now,
+        newMetadata,
+        thread.config,
+        "idle",
+        thread.values,
+      ],
     );
 
     checkpointer.copy(thread_id, newThreadId);
 
     const result = newThreadRows[0];
-
+    // getState 会数据缺失, 但是这种方式会导致数据不符合
+    if (!result.config) {
+      result.config = {
+        configurable: {
+          thread_id: result.thread_id,
+        },
+      };
+    } else if (!result.config.configurable) {
+      result.config.configurable = {
+        thread_id: result.thread_id,
+      };
+    } else {
+      result.config.configurable.thread_id = result.thread_id;
+    }
+    await Threads.State.post(result.config, result.values, undefined, auth);
     return {
       thread_id: result.thread_id,
       created_at: result.created_at,
@@ -491,10 +522,16 @@ export class Threads {
 
       let thread;
       if (threadId) {
-        try {
-          thread = await Threads.get(threadId, auth);
-        } catch (error) {
-          thread = undefined;
+        const [filters] = await handleAuthEvent(auth, "threads:read", {
+          thread_id: threadId,
+        });
+
+        thread = await Threads.get(threadId, auth);
+
+        if (!isAuthMatching(thread.metadata, filters)) {
+          throw new HTTPException(403, {
+            message: `Access denied to thread ${threadId}`,
+          });
         }
       }
 
@@ -545,6 +582,17 @@ export class Threads {
 
       if (!isAuthMatching(thread["metadata"], filters)) {
         throw new HTTPException(403);
+      }
+
+      // 检查是否有待处理的运行
+      const { rows: pendingRuns } = await database.getPool().query(
+        `SELECT COUNT(*) as count FROM public.run 
+         WHERE thread_id = $1 AND (status = 'pending' OR status = 'running')`,
+        [threadId],
+      );
+
+      if (parseInt(pendingRuns[0].count) > 0) {
+        throw new HTTPException(409, { message: "Thread is busy" });
       }
 
       const graphId = thread.metadata?.graph_id as string | undefined | null;
@@ -698,6 +746,7 @@ export class Threads {
         before,
         filter: options?.metadata,
       })) {
+        console.log(state);
         states.push(state);
       }
 
@@ -727,7 +776,6 @@ export class Threads {
       if (graphId == null) return [];
 
       const graph = await getGraph(graphId, thread.config, {
-        checkpointer,
         store,
       });
       const before: RunnableConfig | undefined =

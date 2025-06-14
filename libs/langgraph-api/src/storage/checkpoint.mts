@@ -21,6 +21,7 @@ class PGCheckpointSaver extends PGLangGraphBase {
     logger.info("cancel clear checkpoint storage");
   }
 
+  // TODO checkpoint 的拷贝有问题
   async copy(threadId: string, newThreadId: string) {
     const thread = await this.getTuple({
       configurable: {
@@ -34,8 +35,11 @@ class PGCheckpointSaver extends PGLangGraphBase {
 
     this.put(
       {
+        ...thread.config,
         configurable: {
+          ...thread.config.configurable,
           thread_id: newThreadId,
+          checkpoint_id: thread.parentConfig?.configurable?.checkpoint_id,
         },
       },
       thread.checkpoint,

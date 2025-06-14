@@ -128,14 +128,14 @@ export const truncate = async (flags: {
       await client.query("DELETE FROM public.thread");
     }
 
-    if (flags.assistants) {
-      // 只保留系统创建的助手
-      await client.query(`
-        DELETE FROM public.assistant 
-        WHERE NOT (metadata->>'created_by' = 'system' AND 
-                  assistant_id = uuid_generate_v5('${NAMESPACE_GRAPH}', graph_id))
-      `);
-    }
+    // if (flags.assistants) {
+    //   // 只保留系统创建的助手
+    //   await client.query(`
+    //     DELETE FROM public.assistant
+    //     WHERE NOT (metadata->>'created_by' = 'system' AND
+    //               assistant_id = uuid_generate_v5('${NAMESPACE_GRAPH}', graph_id))
+    //   `);
+    // }
 
     await client.query("COMMIT");
   } catch (error) {
@@ -146,7 +146,7 @@ export const truncate = async (flags: {
   }
 
   if (flags.checkpointer) checkpointer.clear();
-  if (flags.store) store.clear();
+  if (flags.store) store?.clear();
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> => {

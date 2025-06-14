@@ -68,10 +68,15 @@ const worker = async (run: Run, attempt: number, abortSignal: AbortSignal) => {
       });
 
       for await (const { event, data } of stream) {
-        await Runs.Stream.publish(runId, event, data);
+        await Runs.Stream.publish({ runId, resumable, event, data });
       }
     } catch (error) {
-      await Runs.Stream.publish(runId, "error", serializeError(error));
+      await Runs.Stream.publish({
+        runId,
+        resumable,
+        event: "error",
+        data: serializeError(error),
+      });
       throw error;
     }
 

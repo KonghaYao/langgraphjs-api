@@ -36,27 +36,58 @@ interface Message {
 }
 
 class Queue {
-  private buffer: Message[] = [];
-  private listeners: (() => void)[] = [];
+  private log: Message[] = [];
+  private listeners: ((idx: number) => void)[] = [];
+  private nextId = 0;
+  private resumable: boolean;
 
-  push(item: Message) {
-    this.buffer.push(item);
-    for (const listener of this.listeners) {
-      listener();
-    }
+  constructor(options?: { resumable?: boolean }) {
+    this.resumable = options?.resumable ?? false;
   }
 
-  async get(options: { timeout: number; signal?: AbortSignal }) {
-    if (this.buffer.length > 0) {
-      return this.buffer.shift()!;
+  push(item: Message) {
+    this.log.push(item);
+    for (const listener of this.listeners) {
+      listener(this.nextId);
+    }
+    this.nextId += 1;
+  }
+
+  async get(options: {
+    timeout: number;
+    signal?: AbortSignal;
+    lastEventId?: string;
+  }): Promise<[string, Message]> {
+    if (this.resumable) {
+      const lastEventId = options.lastEventId;
+
+      // Generator stores internal state of the read head index
+      let targetId = lastEventId != null ? +lastEventId + 1 : null;
+      if (
+        targetId == null ||
+        isNaN(targetId) ||
+        targetId < 0 ||
+        targetId >= this.log.length
+      ) {
+        targetId = null;
+      }
+
+      if (targetId != null) return [String(targetId), this.log[targetId]];
+    } else {
+      if (this.log.length) {
+        const nextId = this.nextId - this.log.length;
+        const nextItem = this.log.shift()!;
+        return [String(nextId), nextItem];
+      }
     }
 
     let timeout: NodeJS.Timeout | undefined = undefined;
-    let resolver: (() => void) | undefined = undefined;
+    let resolver: ((idx: number) => void) | undefined = undefined;
 
     const clean = new AbortController();
 
-    return await new Promise<void>((resolve, reject) => {
+    // listen to new item
+    return await new Promise<number>((resolve, reject) => {
       timeout = setTimeout(() => reject(new TimeoutError()), options.timeout);
       resolver = resolve;
 
@@ -68,7 +99,15 @@ class Queue {
 
       this.listeners.push(resolver);
     })
-      .then(() => this.buffer.shift()!)
+      .then((idx) => {
+        if (this.resumable) {
+          return [String(idx), this.log[idx]] as [string, Message];
+        }
+
+        const nextId = this.nextId - this.log.length;
+        const nextItem = this.log.shift()!;
+        return [String(nextId), nextItem] as [string, Message];
+      })
       .finally(() => {
         this.listeners = this.listeners.filter((l) => l !== resolver);
         clearTimeout(timeout);
@@ -87,14 +126,20 @@ class StreamManagerImpl {
   readers: Record<string, Queue> = {};
   control: Record<string, CancellationAbortController> = {};
 
-  getQueue(runId: string, options: { ifNotFound: "create" }): Queue;
+  getQueue(
+    runId: string,
+    options: { ifNotFound: "create"; resumable?: boolean },
+  ): Queue;
 
   getQueue(runId: string, options: { ifNotFound: "ignore" }): Queue | undefined;
 
-  getQueue(runId: string, options: { ifNotFound: "create" | "ignore" }) {
+  getQueue(
+    runId: string,
+    options: { ifNotFound: "create" | "ignore"; resumable?: boolean },
+  ) {
     if (this.readers[runId] == null) {
       if (options?.ifNotFound === "create") {
-        this.readers[runId] = new Queue();
+        this.readers[runId] = new Queue({ resumable: options.resumable });
       } else {
         return undefined;
       }
@@ -213,7 +258,11 @@ export class Runs {
       .getPool()
       .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
         assistantId,
-      ]);
+      ])
+      .catch((e) => {
+        //! 这里捕获错误
+        return { rows: [] };
+      });
 
     if (assistantRows.length === 0) {
       throw new HTTPException(404, {
@@ -339,27 +388,29 @@ export class Runs {
       }
 
       // 检查待处理的运行
+      // 无论是否设置 preventInsertInInflight，都先获取待处理的运行
+      const { rows: pendingRunRows } = await client.query(
+        `SELECT * FROM public.run 
+         WHERE thread_id = $1 AND status = 'pending'`,
+        [threadId],
+      );
+
       let inflightRuns: Run[] = [];
-      if (options?.preventInsertInInflight) {
-        const { rows: pendingRunRows } = await client.query(
-          `SELECT * FROM public.run 
-           WHERE thread_id = $1 AND status = 'pending'`,
-          [threadId],
-        );
+      if (pendingRunRows.length > 0) {
+        inflightRuns = pendingRunRows.map((row) => ({
+          run_id: row.run_id,
+          thread_id: row.thread_id,
+          assistant_id: row.assistant_id,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          status: row.status,
+          metadata: row.metadata,
+          kwargs: row.kwargs,
+          multitask_strategy: row.multitask_strategy,
+        }));
 
-        if (pendingRunRows.length > 0) {
-          inflightRuns = pendingRunRows.map((row) => ({
-            run_id: row.run_id,
-            thread_id: row.thread_id,
-            assistant_id: row.assistant_id,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            status: row.status,
-            metadata: row.metadata,
-            kwargs: row.kwargs,
-            multitask_strategy: row.multitask_strategy,
-          }));
-
+        // 只有在 preventInsertInInflight 为 true 时才返回待处理的运行
+        if (options?.preventInsertInInflight) {
           await client.query("COMMIT");
           return inflightRuns;
         }
@@ -556,7 +607,7 @@ export class Runs {
     const runStream = Runs.Stream.join(
       runId,
       threadId,
-      { ignore404: threadId == null },
+      { ignore404: threadId == null, lastEventId: undefined },
       auth,
     );
 
@@ -663,6 +714,14 @@ export class Runs {
                SET status = 'interrupted', updated_at = $1
                WHERE run_id = $2`,
               [new Date(), runId],
+            );
+
+            // 更新线程状态为idle
+            await client.query(
+              `UPDATE public.thread 
+               SET status = 'idle', updated_at = $1
+               WHERE thread_id = $2`,
+              [new Date(), run.thread_id],
             );
           } else {
             console.info(
@@ -800,13 +859,17 @@ export class Runs {
       runId: string,
       threadId: string | undefined,
       options: {
+        lastEventId?: string;
         ignore404?: boolean;
         cancelOnDisconnect?: AbortSignal;
       },
       auth: AuthContext | undefined,
-    ): AsyncGenerator<{ event: string; data: unknown }> {
+    ): AsyncGenerator<{ id?: string; event: string; data: unknown }> {
       const signal = options?.cancelOnDisconnect;
-      const queue = StreamManager.getQueue(runId, { ifNotFound: "create" });
+      const queue = StreamManager.getQueue(runId, {
+        ifNotFound: "create",
+        resumable: options.lastEventId != null,
+      });
 
       const [filters] = await handleAuthEvent(auth, "threads:read", {
         thread_id: threadId,
@@ -825,16 +888,22 @@ export class Runs {
           !isAuthMatching(threadRows[0].metadata, filters)
         ) {
           yield {
+            id: undefined,
             event: "error",
             data: { error: "Error", message: "404: Thread not found" },
           };
           return;
         }
       }
-
+      let lastEventId = options?.lastEventId;
       while (!signal?.aborted) {
         try {
-          const message = await queue.get({ timeout: 500, signal });
+          const [id, message] = await queue.get({
+            timeout: 500,
+            signal,
+            lastEventId,
+          });
+          lastEventId = id;
           if (message.topic === `run:${runId}:control`) {
             if (message.data === "done") break;
           } else {
@@ -842,7 +911,7 @@ export class Runs {
               `run:${runId}:stream:`.length,
             );
 
-            yield { event: streamTopic, data: message.data };
+            yield { id: runId, event: streamTopic, data: message.data };
           }
         } catch (error) {
           if (error instanceof AbortError) break;
@@ -850,7 +919,7 @@ export class Runs {
           const run = await Runs.get(runId, threadId, auth);
           if (run == null) {
             if (!options?.ignore404)
-              yield { event: "error", data: "Run not found" };
+              yield { id: undefined, event: "error", data: "Run not found" };
             break;
           } else if (run.status !== "pending") {
             break;
@@ -863,9 +932,20 @@ export class Runs {
       }
     }
 
-    static async publish(runId: string, topic: string, data: unknown) {
-      const queue = StreamManager.getQueue(runId, { ifNotFound: "create" });
-      queue.push({ topic: `run:${runId}:stream:${topic}`, data });
+    static async publish(payload: {
+      runId: string;
+      event: string;
+      data: unknown;
+      resumable: boolean;
+    }) {
+      const queue = StreamManager.getQueue(payload.runId, {
+        ifNotFound: "create",
+        resumable: payload.resumable,
+      });
+      queue.push({
+        topic: `run:${payload.runId}:stream:${payload.event}`,
+        data: payload.data,
+      });
     }
   };
 }

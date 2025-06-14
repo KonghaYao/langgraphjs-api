@@ -42,7 +42,7 @@ const USERS_DB: Record<
 export const auth = new Auth()
   .authenticate(async (request) => {
     const authorization = request.headers.get("Authorization");
-
+    console.log(authorization);
     const exc = new HTTPException(401, {
       message: "Could not validate credentials",
       headers: { "WWW-Authenticate": "Bearer" },

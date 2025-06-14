@@ -126,6 +126,8 @@ export async function createHonoServer(
   // Loopback fetch used by webhooks and custom routes
   bindLoopbackFetch(app);
 
+  // #if [!PROD]
+  // 生产环境不允许有这个直接删库的功能
   app.post(
     "/internal/truncate",
     zValidator(
@@ -146,7 +148,7 @@ export async function createHonoServer(
       return c.json({ ok: true });
     },
   );
-
+  // #endif
   app.use(cors(options.http?.cors));
   app.use(requestLogger());
 
