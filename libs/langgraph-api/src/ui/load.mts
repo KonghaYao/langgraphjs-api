@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Hono } from "hono";
 import { getMimeType } from "hono/utils/mime";
 import { zValidator } from "@hono/zod-validator";
-import { watch } from "@langchain/langgraph-ui";
+// import { watch } from "@langchain/langgraph-ui";
 import * as path from "node:path";
 
 const GRAPH_UI: Record<string, { basename: string; contents: Uint8Array }[]> =
@@ -12,12 +12,12 @@ export async function registerGraphUi(
   defs: Record<string, string>,
   options: { cwd: string; config?: { shared?: string[] } },
 ) {
-  await watch({
-    defs,
-    cwd: options.cwd,
-    config: options.config,
-    onOutput: (graphId, files) => (GRAPH_UI[graphId] = files),
-  });
+  // await watch({
+  //   defs,
+  //   cwd: options.cwd,
+  //   config: options.config,
+  //   onOutput: (graphId, files) => (GRAPH_UI[graphId] = files),
+  // });
 }
 
 export const api = new Hono();
