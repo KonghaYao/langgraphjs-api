@@ -1,7 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { type RunCommand } from "../command.mjs";
-import { NAMESPACE_GRAPH } from "../graph/load.mjs";
 import { checkpointer } from "./checkpoint.mjs";
 import { FileSystemPersistence } from "./persist.mjs";
 import { store } from "./store.mjs";
