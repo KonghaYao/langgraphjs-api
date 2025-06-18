@@ -14,9 +14,12 @@
   "dependencies": {
     "@langchain/langgraph-checkpoint": "^0.0.17",
     "@langchain/langgraph-checkpoint-postgres": "^0.0.5",
+    "@langchain/langgraph-checkpoint-sqlite": "^0.1.5",
+    "better-sqlite3": "^11.10.0",
     "pg": "^8.15.6"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/pg": "^8.15.1"
   }
 }

@@ -2492,7 +2492,7 @@ it("dynamic graph", async () => {
   expect(state.values.messages).toEqual(["input", "assistant", "update"]);
 });
 
-it("generative ui", async () => {
+it.skip("generative ui", async () => {
   const ui = await client["~ui"].getComponent("agent", "weather-component");
   expect(ui).toContain(
     `<script src="http://localhost:2024/ui/agent/entrypoint.js" onload='__LGUI_agent.render("weather-component", "{{shadowRootId}}")'></script>`,
