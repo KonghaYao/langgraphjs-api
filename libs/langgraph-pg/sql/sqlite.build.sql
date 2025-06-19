@@ -68,6 +68,7 @@ CREATE TABLE checkpoints (
     run_id TEXT,
     parent_checkpoint_id TEXT,
     checkpoint TEXT NOT NULL,
+    type TEXT,
     metadata TEXT DEFAULT '{}' NOT NULL,
     checkpoint_ns TEXT DEFAULT '' NOT NULL,
     PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id),
