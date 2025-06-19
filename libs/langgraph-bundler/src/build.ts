@@ -203,6 +203,7 @@ function prepareHelperEntries(
  */
 export async function buildLanggraph(
   cwd: string = process.cwd(),
+  databaseType: 'sqlite' | 'postgres' = 'sqlite',
 ): Promise<void> {
   console.log(`Building langgraph in ${cwd}...`);
 
@@ -269,7 +270,7 @@ export async function buildLanggraph(
             include: ['cloudflare:sockets', 'typescript'],
           }),
           condition({
-            env: 'node',
+            env: 'node-' + databaseType,
           }),
         ],
         define: {

@@ -11,6 +11,7 @@ const options = {
   cwd: process.cwd(),
   help: false,
   version: false,
+  db: 'sqlite' as 'sqlite' | 'postgres', // 默认数据库类型为 sqlite
 };
 
 // 获取当前文件的目录
@@ -32,6 +33,13 @@ for (let i = 0; i < args.length; i++) {
     options.version = true;
   } else if (arg === '--cwd' && i + 1 < args.length) {
     options.cwd = path.resolve(process.cwd(), args[++i]);
+  } else if (arg.startsWith('--db=')) {
+    const dbType = arg.split('=')[1];
+    if (dbType === 'sqlite' || dbType === 'postgres') {
+      options.db = dbType;
+    } else {
+      console.warn(`不支持的数据库类型: ${dbType}，使用默认值 sqlite`);
+    }
   }
 }
 
@@ -49,10 +57,12 @@ OPTIONS:
   --help, -h     显示帮助信息
   --version, -v  显示版本信息
   --cwd <path>   指定工作目录 (默认: 当前目录)
+  --db=<type>    指定数据库类型，可选值: sqlite, postgres (默认: sqlite)
 
 EXAMPLES:
   npx @langgraph-js/bundler
   npx @langgraph-js/bundler --cwd ./my-project
+  npx @langgraph-js/bundler --db=postgres
   `);
   process.exit(0);
 }
@@ -64,7 +74,7 @@ if (options.version) {
 }
 
 // 执行构建
-buildLanggraph(options.cwd).catch((err) => {
+buildLanggraph(options.cwd, options.db).catch((err) => {
   console.error('构建失败:', err);
   process.exit(1);
 });

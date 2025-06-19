@@ -9,7 +9,7 @@ export default function condition(
 
     transform(code: string, id: string) {
       const conditionedCode = code.replace(reg, (all, p1, p2) => {
-        console.log(p1);
+        // console.log(p1);
         return p1.toLowerCase() === env.toLowerCase() ? p2 : '';
       });
       const result = {
