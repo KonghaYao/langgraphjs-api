@@ -183,7 +183,6 @@ export class Assistants {
     const client = await database.getPool().connect();
     try {
       await client.query("BEGIN");
-
       // 插入新助手
       const { rows } = await client.query(
         `INSERT INTO public.assistant
@@ -221,8 +220,10 @@ export class Assistants {
 
       await client.query("COMMIT");
 
+      if (rows.length === 0) {
+        throw new HTTPException(404, { message: "Assistant not found" });
+      }
       const result = rows[0];
-
       return {
         assistant_id: result.assistant_id,
         graph_id: result.graph_id,
@@ -377,7 +378,9 @@ export class Assistants {
       }
 
       await client.query("COMMIT");
-
+      if (rows.length === 0) {
+        throw new HTTPException(404, { message: "Assistant not found" });
+      }
       const result = rows[0];
       return {
         assistant_id: result.assistant_id,
@@ -391,6 +394,7 @@ export class Assistants {
         description: result.description,
       };
     } catch (error) {
+      console.error(error);
       await client.query("ROLLBACK");
       throw error;
     } finally {
