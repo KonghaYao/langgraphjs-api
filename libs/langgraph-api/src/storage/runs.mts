@@ -397,7 +397,7 @@ export class Runs {
 
       let inflightRuns: Run[] = [];
       if (pendingRunRows.length > 0) {
-        inflightRuns = pendingRunRows.map((row) => ({
+        inflightRuns = pendingRunRows.map((row: Run) => ({
           run_id: row.run_id,
           thread_id: row.thread_id,
           assistant_id: row.assistant_id,
@@ -824,7 +824,7 @@ export class Runs {
 
     const { rows } = await database.getPool().query(query, params);
 
-    return rows.map((row) => ({
+    return rows.map((row: Run) => ({
       run_id: row.run_id,
       thread_id: row.thread_id,
       assistant_id: row.assistant_id,

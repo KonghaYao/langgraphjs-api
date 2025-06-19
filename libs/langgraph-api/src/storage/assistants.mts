@@ -460,7 +460,7 @@ export class Assistants {
 
     const { rows } = await database.getPool().query(query, params);
 
-    return rows.map((row) => ({
+    return rows.map((row: Assistant) => ({
       assistant_id: row.assistant_id,
       version: row.version,
       graph_id: row.graph_id,

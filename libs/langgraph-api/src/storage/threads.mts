@@ -134,7 +134,7 @@ export class Threads {
     const dbTotal = rows.length > 0 ? parseInt(rows[0].total_count) : 0;
 
     // 过滤有权限访问的记录
-    const filteredRows = rows.filter((row) =>
+    const filteredRows = rows.filter((row: Thread) =>
       isAuthMatching(row.metadata, filters),
     );
 

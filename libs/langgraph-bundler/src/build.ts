@@ -203,9 +203,11 @@ function prepareHelperEntries(
  */
 export async function buildLanggraph(
   cwd: string = process.cwd(),
-  databaseType: 'sqlite' | 'postgres' = 'sqlite',
+  databaseType: 'sqlite' | 'postgres' = 'postgres',
 ): Promise<void> {
-  console.log(`Building langgraph in ${cwd}...`);
+  console.log(
+    `Building langgraph in ${cwd}...\nUsing database type: ${databaseType}`,
+  );
 
   try {
     // 1. 加载配置
@@ -267,7 +269,7 @@ export async function buildLanggraph(
         plugins: [
           nodeExternals({
             deps: false,
-            include: ['cloudflare:sockets', 'typescript'],
+            include: ['cloudflare:sockets', 'typescript', 'better-sqlite3'],
           }),
           condition({
             env: 'node-' + databaseType,

@@ -11,7 +11,7 @@ const options = {
   cwd: process.cwd(),
   help: false,
   version: false,
-  db: 'sqlite' as 'sqlite' | 'postgres', // 默认数据库类型为 sqlite
+  db: 'postgres' as 'sqlite' | 'postgres', // 默认数据库类型为 postgres
 };
 
 // 获取当前文件的目录
@@ -57,7 +57,7 @@ OPTIONS:
   --help, -h     显示帮助信息
   --version, -v  显示版本信息
   --cwd <path>   指定工作目录 (默认: 当前目录)
-  --db=<type>    指定数据库类型，可选值: sqlite, postgres (默认: sqlite)
+  --db=<type>    指定数据库类型，可选值: sqlite, postgres (默认: postgres)
 
 EXAMPLES:
   npx @langgraph-js/bundler
