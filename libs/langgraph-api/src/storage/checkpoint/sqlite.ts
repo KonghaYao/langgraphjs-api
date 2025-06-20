@@ -1,4 +1,4 @@
-import { SqliteLangGraphBase } from "@langgraph-js/langgraph-pg/dist/sqlite.mjs";
+import { SqliteLangGraphBase } from "@langgraph-js/langgraph-pg/sqlite";
 import { logger } from "../../logging.mjs";
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 

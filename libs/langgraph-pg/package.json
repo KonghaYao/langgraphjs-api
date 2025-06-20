@@ -1,11 +1,21 @@
 {
   "name": "@langgraph-js/langgraph-pg",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
-  "main": "dist/index.mjs",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "vite build",
     "prepublishOnly": "pnpm build"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./sqlite": {
+      "import": "./dist/sqlite.js",
+      "types": "./dist/sqlite.d.ts"
+    }
   },
   "type": "module",
   "keywords": [],

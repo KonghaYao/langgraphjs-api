@@ -1,11 +1,6 @@
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import pg from 'pg';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 export * from '@langchain/langgraph-checkpoint-postgres';
 export interface LangGraphBase {}
 
@@ -46,10 +41,7 @@ export class PGLangGraphBase extends PostgresSaver implements LangGraphBase {
   }
   static async setup(pool: pg.Pool) {
     // 执行 postgres.build.sql
-    const sql = fs.readFileSync(
-      path.join(__dirname, '../sql/postgres.build.sql'),
-      'utf8',
-    );
+    const { default: sql } = await import('../sql/postgres.build.sql?raw');
     await pool.query(sql);
     console.log('setup database success');
   }
