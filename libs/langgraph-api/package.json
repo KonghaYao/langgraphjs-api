@@ -1,6 +1,6 @@
 {
   "name": "@langgraph-js/api",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "type": "module",
   "engines": {
     "node": "^18.19.0 || >=20.0.0"
@@ -47,7 +47,8 @@
     "test:parser": "vitest run ./tests/parser.test.mts --testTimeout 15000",
     "test:api": "npx -y bun scripts/test.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@babel/code-frame": "^7.26.2",

@@ -9,7 +9,7 @@ import assistants from "./api/assistants.mjs";
 import store from "./api/store.mjs";
 import meta from "./api/meta.mjs";
 
-import { truncate, conn as opsConn } from "./storage/ops.mjs";
+import { truncate } from "./storage/ops.mjs";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { queue } from "./queue.mjs";
@@ -107,7 +107,7 @@ export async function createHonoServer(
 
   logger.info(`Initializing storage...`);
   const callbacks = await Promise.all([
-    opsConn.initialize(options.cwd),
+    // opsConn.initialize(options.cwd),
     checkpointer.initialize(options.cwd),
     graphStore.initialize(options.cwd),
     globalCallbacks.initialize(options),

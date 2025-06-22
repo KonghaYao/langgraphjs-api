@@ -18,6 +18,9 @@ export interface LanggraphConfig {
   callbacks?: {
     path: string;
   };
+  http?: {
+    app: string;
+  };
 }
 
 interface BuildEntries {
@@ -30,7 +33,14 @@ interface HelperEntries {
 }
 
 // 常量定义
-const INVALID_AGENT_NAMES = ['auth', 'dev', 'start', 'entrypoint', 'callbacks'];
+const INVALID_AGENT_NAMES = [
+  'auth',
+  'dev',
+  'start',
+  'entrypoint',
+  'callbacks',
+  'http',
+];
 const DEFAULT_DIST_DIR = './dist';
 
 /**
@@ -90,6 +100,12 @@ function prepareEntries(config: LanggraphConfig, cwd: string): BuildEntries {
     entries['callbacks'] = path.resolve(cwd, filePath);
   }
 
+  // 处理 HTTP 应用入口点
+  if (config.http?.app) {
+    const [filePath] = config.http.app.split(':');
+    entries['http'] = path.resolve(cwd, filePath);
+  }
+
   return entries;
 }
 
@@ -121,6 +137,12 @@ function createBuildConfig(config: LanggraphConfig): LanggraphConfig {
 
   if (buildConfig.callbacks?.path) {
     buildConfig.callbacks.path = `./callbacks.js`;
+  }
+
+  // 调整 HTTP 应用路径
+  if (buildConfig.http?.app) {
+    const [_, exportName] = buildConfig.http.app.split(':');
+    buildConfig.http.app = `./http.js:${exportName || 'default'}`;
   }
 
   return buildConfig;

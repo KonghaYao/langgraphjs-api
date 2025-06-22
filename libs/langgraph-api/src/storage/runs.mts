@@ -14,6 +14,7 @@ import { checkpointer } from "./checkpoint.mjs";
 import { v4 as uuid4 } from "uuid";
 import { serializeError } from "../utils/serde.mjs";
 import { Threads } from "./threads.mjs";
+import { logger } from "../logging.mjs";
 
 class TimeoutError extends Error {}
 class AbortError extends Error {}
@@ -259,8 +260,9 @@ export class Runs {
       .query(`SELECT * FROM public.assistant WHERE assistant_id = $1`, [
         assistantId,
       ])
-      .catch((e) => {
+      .catch((e: unknown) => {
         //! 这里捕获错误
+        logger.error(e);
         return { rows: [] };
       });
 

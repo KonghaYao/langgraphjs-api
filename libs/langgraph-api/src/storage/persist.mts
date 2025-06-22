@@ -1,5 +1,4 @@
 import * as path from "node:path";
-import * as fs from "node:fs/promises";
 import * as superjson from "superjson";
 import * as importMap from "./importMap.mjs";
 import { load } from "@langchain/core/load";
@@ -52,7 +51,7 @@ export class FileSystemPersistence<Schema> {
   protected async persist() {
     if (this.data == null || this.filepath == null) return;
     clearTimeout(this.flushTimeout);
-    await fs.writeFile(this.filepath, serialize(this.data), "utf-8");
+    // await fs.writeFile(this.filepath, serialize(this.data), "utf-8");
   }
 
   protected schedulePersist() {
