@@ -17,6 +17,7 @@
   },
   "env": {
     "LANGGRAPH_CONFIG": "{\"agent\": {\"configurable\": {\"model_name\": \"openai\"}}}",
-    "DATABASE_URL": "postgres://postgres:postgres@localhost:5434/langgraph_test_1?sslmode=disable"
+    "DATABASE_URL": "postgres://postgres:postgres@localhost:5434/langgraph_test_1?sslmode=disable",
+    "LANGGRAPH_REDIS": "redis://:redis123@localhost:6379/test1"
   }
 }

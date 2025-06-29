@@ -351,7 +351,7 @@ export class Threads {
     );
 
     const hasPendingRuns = parseInt(pendingRuns[0].count) > 0;
-    console.log(pendingRuns);
+    // console.log(pendingRuns);
     let status: ThreadStatus = "idle";
 
     if (options.exception != null) {
@@ -746,7 +746,7 @@ export class Threads {
         before,
         filter: options?.metadata,
       })) {
-        console.log(state);
+        // console.log(state);
         states.push(state);
       }
 

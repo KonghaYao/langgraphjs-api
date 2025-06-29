@@ -1,6 +1,6 @@
 {
   "name": "@langgraph-js/api",
-  "version": "1.0.4",
+  "version": "1.1.4",
   "type": "module",
   "engines": {
     "node": "^18.19.0 || >=20.0.0"
@@ -54,13 +54,13 @@
     "@babel/code-frame": "^7.26.2",
     "@hono/node-server": "^1.12.0",
     "@hono/zod-validator": "^0.2.2",
+    "@langgraph-js/langgraph-pg": "workspace:^2.0.0",
     "@types/json-schema": "^7.0.15",
     "@typescript/vfs": "^1.6.0",
     "dedent": "^1.5.3",
     "dotenv": "^16.4.7",
     "exit-hook": "^4.0.0",
     "hono": "^4.5.4",
-    "@langgraph-js/langgraph-pg": "workspace:^2.0.0",
     "langsmith": "^0.2.15",
     "open": "^10.1.0",
     "pg": "^8.15.6",
@@ -89,7 +89,7 @@
   "devDependencies": {
     "@langchain/core": "^0.3.42",
     "@langchain/langgraph": "^0.3.3",
-    "@langchain/langgraph-checkpoint": "~0.0.16",
+    "@langchain/langgraph-checkpoint": "~0.0.17",
     "@langchain/langgraph-sdk": "^0.0.84",
     "@types/babel__code-frame": "^7.0.6",
     "@types/node": "^22.2.0",

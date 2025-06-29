@@ -31,5 +31,8 @@
       "better-sqlite3",
       "esbuild"
     ]
+  },
+  "dependencies": {
+    "ioredis": "^5.6.1"
   }
 }

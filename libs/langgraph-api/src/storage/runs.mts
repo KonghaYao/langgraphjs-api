@@ -15,8 +15,8 @@ import { v4 as uuid4 } from "uuid";
 import { serializeError } from "../utils/serde.mjs";
 import { Threads } from "./threads.mjs";
 import { logger } from "../logging.mjs";
+import { StreamAdapterFactory } from "./stream-config.mjs";
 
-class TimeoutError extends Error {}
 class AbortError extends Error {}
 
 interface Run {
@@ -30,150 +30,24 @@ interface Run {
   kwargs: RunKwargs;
   multitask_strategy: MultitaskStrategy;
 }
-
-interface Message {
-  topic: `run:${string}:stream:${string}`;
-  data: unknown;
-}
-
-class Queue {
-  private log: Message[] = [];
-  private listeners: ((idx: number) => void)[] = [];
-  private nextId = 0;
-  private resumable: boolean;
-
-  constructor(options?: { resumable?: boolean }) {
-    this.resumable = options?.resumable ?? false;
+export const StreamManager = await StreamAdapterFactory.fromEnv();
+class InMemoryCounter {
+  counter = new Map<string, number>();
+  constructor() {
+    this.counter = new Map();
   }
-
-  push(item: Message) {
-    this.log.push(item);
-    for (const listener of this.listeners) {
-      listener(this.nextId);
-    }
-    this.nextId += 1;
+  increment(runId: string) {
+    this.counter.set(runId, (this.counter.get(runId) ?? 0) + 1);
   }
-
-  async get(options: {
-    timeout: number;
-    signal?: AbortSignal;
-    lastEventId?: string;
-  }): Promise<[string, Message]> {
-    if (this.resumable) {
-      const lastEventId = options.lastEventId;
-
-      // Generator stores internal state of the read head index
-      let targetId = lastEventId != null ? +lastEventId + 1 : null;
-      if (
-        targetId == null ||
-        isNaN(targetId) ||
-        targetId < 0 ||
-        targetId >= this.log.length
-      ) {
-        targetId = null;
-      }
-
-      if (targetId != null) return [String(targetId), this.log[targetId]];
-    } else {
-      if (this.log.length) {
-        const nextId = this.nextId - this.log.length;
-        const nextItem = this.log.shift()!;
-        return [String(nextId), nextItem];
-      }
-    }
-
-    let timeout: NodeJS.Timeout | undefined = undefined;
-    let resolver: ((idx: number) => void) | undefined = undefined;
-
-    const clean = new AbortController();
-
-    // listen to new item
-    return await new Promise<number>((resolve, reject) => {
-      timeout = setTimeout(() => reject(new TimeoutError()), options.timeout);
-      resolver = resolve;
-
-      options.signal?.addEventListener(
-        "abort",
-        () => reject(new AbortError()),
-        { signal: clean.signal },
-      );
-
-      this.listeners.push(resolver);
-    })
-      .then((idx) => {
-        if (this.resumable) {
-          return [String(idx), this.log[idx]] as [string, Message];
-        }
-
-        const nextId = this.nextId - this.log.length;
-        const nextItem = this.log.shift()!;
-        return [String(nextId), nextItem] as [string, Message];
-      })
-      .finally(() => {
-        this.listeners = this.listeners.filter((l) => l !== resolver);
-        clearTimeout(timeout);
-        clean.abort();
-      });
+  decrement(runId: string) {
+    this.counter.set(runId, (this.counter.get(runId) ?? 0) - 1);
+  }
+  get(runId: string) {
+    return this.counter.get(runId) ?? 0;
   }
 }
-
-class CancellationAbortController extends AbortController {
-  abort(reason: "rollback" | "interrupt") {
-    super.abort(reason);
-  }
-}
-
-class StreamManagerImpl {
-  readers: Record<string, Queue> = {};
-  control: Record<string, CancellationAbortController> = {};
-
-  getQueue(
-    runId: string,
-    options: { ifNotFound: "create"; resumable?: boolean },
-  ): Queue;
-
-  getQueue(runId: string, options: { ifNotFound: "ignore" }): Queue | undefined;
-
-  getQueue(
-    runId: string,
-    options: { ifNotFound: "create" | "ignore"; resumable?: boolean },
-  ) {
-    if (this.readers[runId] == null) {
-      if (options?.ifNotFound === "create") {
-        this.readers[runId] = new Queue({ resumable: options.resumable });
-      } else {
-        return undefined;
-      }
-    }
-
-    return this.readers[runId];
-  }
-
-  getControl(runId: string) {
-    if (this.control[runId] == null) return undefined;
-    return this.control[runId];
-  }
-
-  isLocked(runId: string): boolean {
-    return this.control[runId] != null;
-  }
-
-  lock(runId: string): AbortSignal {
-    if (this.control[runId] != null) {
-      console.warn("Run already locked", { run_id: runId });
-    }
-    this.control[runId] = new CancellationAbortController();
-    return this.control[runId].signal;
-  }
-
-  unlock(runId: string) {
-    delete this.control[runId];
-  }
-}
-
-export const StreamManager = new StreamManagerImpl();
-
 export class Runs {
+  static counter = new InMemoryCounter();
   static async *next(): AsyncGenerator<{
     run: Run;
     attempt: number;
@@ -208,14 +82,15 @@ export class Runs {
         continue;
       }
 
-      if (StreamManager.isLocked(runId)) continue;
-
+      let lockAcquired = false;
       try {
-        const signal = StreamManager.lock(runId);
+        // 直接尝试获取锁，避免 isLocked 和 lock 之间的竞态条件
+        const signal = await StreamManager.lock(runId);
+        lockAcquired = true;
 
-        // 模拟重试计数器，实际项目中可能需要在数据库中维护
-        // 这里仅将尝试次数设为1，因为没有持久化的方式跟踪
-        const attempt = 1;
+        // 使用 InMemoryCounter 跟踪重试次数
+        Runs.counter.increment(runId);
+        const attempt = Runs.counter.get(runId);
 
         yield {
           run: {
@@ -232,8 +107,18 @@ export class Runs {
           attempt,
           signal,
         };
+      } catch (error) {
+        // 如果锁获取失败（已被其他进程锁定），跳过这个 run
+        if (error instanceof Error && error.message === "Run already locked") {
+          continue;
+        }
+        // 其他错误重新抛出
+        throw error;
       } finally {
-        StreamManager.unlock(runId);
+        // 只有在成功获取锁的情况下才释放锁
+        if (lockAcquired) {
+          StreamManager.unlock(runId);
+        }
       }
     }
   }
@@ -705,8 +590,10 @@ export class Runs {
         foundRunsCount += 1;
 
         // 发送取消消息
-        const control = StreamManager.getControl(runId);
-        control?.abort(options.action ?? "interrupt");
+        const control = await StreamManager.getControl(runId);
+        if (control) {
+          control.abort(options.action ?? "interrupt");
+        }
 
         if (run.status === "pending") {
           if (control || action !== "rollback") {

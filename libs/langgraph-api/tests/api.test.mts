@@ -707,7 +707,6 @@ describe("runs", () => {
         previousMessageIds = messageIds;
       }
     }
-
     expect(chunk.event).toBe("values");
     expect(seenEventTypes).toEqual(new Set(["metadata", "values"]));
 
@@ -880,7 +879,6 @@ describe("runs", () => {
         lastMessage = message;
       }
     }
-
     expect(lastMessage).not.toBeNull();
     expect(lastMessage.content).toBe("end");
 
@@ -921,7 +919,6 @@ describe("runs", () => {
     const messages = chunks
       .filter((i) => i.event === "messages")
       .map((i) => i.data[0]);
-
     expect(messages).toHaveLength("begin".length + "end".length + 1);
     expect(messages).toMatchObject([
       ..."begin".split("").map((c) => ({ content: c })),
@@ -1021,7 +1018,7 @@ describe("runs", () => {
 
       expect(chunks.filter((i) => i.event === "error").length).toBe(0);
       messages = findLast(chunks, (i) => i.event === "values")?.data.messages;
-
+      // expect(messages.map((i) => i.type)).toEqual(["human", "ai", "ai"]);
       expect(messages.length).toBe(4);
       expect(messages[2].content).toBe("tool_call__begin");
       expect(messages.at(-1)?.content).toBe("end");
@@ -2644,7 +2641,7 @@ it("resumable streams", { timeout: 10_000 }, async () => {
       ]);
 
       return gatherIterator(
-        client.runs.joinStream(thread_id, run_id, { lastEventId: "-1" }),
+                  client.runs.joinStream(thread_id, run_id, { lastEventId: ">" }),
       );
     })(),
 

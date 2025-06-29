@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  # Redis 缓存
+  redis:
+    image: redis:7.4.4-alpine
+    container_name: langgraph-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis123 --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - langgraph-network
+
+# 数据卷
+volumes:
+  redis_data:
+    driver: local
+
+# 网络
+networks:
+  langgraph-network:
+    driver: bridge
+# 开发环境覆盖配置可以在 docker-compose.override.yml 文件中定义

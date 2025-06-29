@@ -208,7 +208,7 @@ api.post("/runs/stream", zValidator("json", schemas.RunCreate), async (c) => {
         undefined,
         {
           cancelOnDisconnect,
-          lastEventId: run.kwargs.resumable ? "-1" : undefined,
+          lastEventId: run.kwargs.resumable ? ">" : undefined,
           ignore404: true,
         },
         c.var.auth,
@@ -338,6 +338,7 @@ api.post(
   },
 );
 
+// 最常用的对话接口
 api.post(
   "/threads/:thread_id/runs/stream",
   zValidator("param", z.object({ thread_id: z.string().uuid() })),
@@ -365,7 +366,7 @@ api.post(
           thread_id,
           {
             cancelOnDisconnect,
-            lastEventId: run.kwargs.resumable ? "-1" : undefined,
+            lastEventId: run.kwargs.resumable ? ">" : undefined,
           },
           c.var.auth,
         )) {
