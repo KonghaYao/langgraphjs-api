@@ -3,7 +3,7 @@
  *
  * 提供基于 Redis 的分布式队列和锁机制，解决 StreamManager 的分布式问题
  */
-import { default as Redis, type Redis as RedisType } from "ioredis";
+import { type Redis as RedisType } from "ioredis";
 import {
   StreamAdapter,
   type QueueInterface,
@@ -56,15 +56,12 @@ class RedisAbortError extends Error {
 // Redis 队列实现 - 基于 Redis Streams 的订阅机制
 class RedisQueue implements QueueInterface {
   private readonly client: RedisType;
-  private readonly keyPrefix: string;
-  private readonly runId: string;
   private readonly resumable: boolean;
   private readonly queueTtl: number;
   private readonly streamTtl: number;
   private readonly enableTtlRefresh: boolean;
   private readonly consumerGroupName: string;
   private readonly consumerName: string;
-  private readonly maxRetries: number;
   private consumerGroupCreated: boolean = false;
 
   // 队列相关的 Redis 键 - 使用 Streams
@@ -86,15 +83,12 @@ class RedisQueue implements QueueInterface {
     },
   ) {
     this.client = client;
-    this.keyPrefix = keyPrefix;
-    this.runId = runId;
     this.resumable = options?.resumable ?? false;
     this.queueTtl = options?.queueTtl ?? 3600; // 默认1小时
     this.streamTtl = options?.streamTtl ?? 3600; // 默认1小时
     this.enableTtlRefresh = options?.enableTtlRefresh ?? true;
     this.consumerGroupName = options?.consumerGroupName ?? "default-group";
     this.consumerName = `consumer-${process.pid}-${Date.now()}`;
-    this.maxRetries = options?.maxRetries ?? 3;
 
     // 构建 Redis 键名 - 使用 Streams
     this.streamKey = `${keyPrefix}stream:${runId}`;

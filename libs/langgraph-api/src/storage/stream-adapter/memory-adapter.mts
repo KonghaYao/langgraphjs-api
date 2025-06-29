@@ -1,4 +1,3 @@
-import { logger } from "../../logging.mjs";
 import {
   StreamAdapter,
   type QueueInterface,
