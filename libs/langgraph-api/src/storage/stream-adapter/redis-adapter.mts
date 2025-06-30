@@ -15,10 +15,7 @@ import { JsonPlusSerializer } from "./json-plus.js";
 
 // Redis 配置接口
 export interface RedisConfig {
-  host?: string;
-  port?: number;
-  password?: string;
-  db?: number;
+  url: string;
   keyPrefix?: string;
   lockTtl?: number; // 锁的生存时间（毫秒）
   queueTtl?: number; // 队列的生存时间（秒）
@@ -422,11 +419,11 @@ export class RedisStreamAdapter extends StreamAdapter {
   constructor(client: RedisType, config?: RedisConfig) {
     super();
     this.client = client;
+    if (!config?.url) {
+      throw new Error("Redis URL is required");
+    }
     this.config = {
-      host: config?.host ?? "localhost",
-      port: config?.port ?? 6379,
-      password: config?.password ?? "",
-      db: config?.db ?? 0,
+      url: config?.url,
       keyPrefix: config?.keyPrefix ?? "langgraph:stream:",
       lockTtl: config?.lockTtl ?? 30000, // 30秒
       queueTtl: config?.queueTtl ?? 3600, // 1小时
