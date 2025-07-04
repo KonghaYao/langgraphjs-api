@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LangGraph Server Configuration",
+  "description": "Configuration schema for LangGraph server startup options",
+  "type": "object",
+  "properties": {
+    "port": {
+      "type": "number",
+      "description": "Server port number",
+      "default": 8123,
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "nWorkers": {
+      "type": "number",
+      "description": "Number of worker processes",
+      "default": 1,
+      "minimum": 1
+    },
+    "host": {
+      "type": "string",
+      "description": "Server host address",
+      "default": "0.0.0.0"
+    },
+    "cwd": {
+      "type": "string",
+      "description": "Current working directory path"
+    },
+    "graphs": {
+      "type": "object",
+      "description": "Graph definitions mapping",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "auth": {
+      "type": "object",
+      "description": "Authentication configuration",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to authentication module"
+        },
+        "disable_studio_auth": {
+          "type": "boolean",
+          "description": "Whether to disable studio authentication",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI configuration mapping",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "ui_config": {
+      "type": "object",
+      "description": "UI configuration options",
+      "properties": {
+        "shared": {
+          "type": "array",
+          "description": "Shared UI components",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "http": {
+      "type": "object",
+      "description": "HTTP server configuration",
+      "properties": {
+        "app": {
+          "type": "string",
+          "description": "Path to custom HTTP app module"
+        },
+        "disable_assistants": {
+          "type": "boolean",
+          "description": "Whether to disable assistants API",
+          "default": false
+        },
+        "disable_threads": {
+          "type": "boolean",
+          "description": "Whether to disable threads API",
+          "default": false
+        },
+        "disable_runs": {
+          "type": "boolean",
+          "description": "Whether to disable runs API",
+          "default": false
+        },
+        "disable_store": {
+          "type": "boolean",
+          "description": "Whether to disable store API",
+          "default": false
+        },
+        "disable_meta": {
+          "type": "boolean",
+          "description": "Whether to disable meta API",
+          "default": false
+        },
+        "cors": {
+          "type": "object",
+          "description": "CORS configuration",
+          "properties": {
+            "allow_origins": {
+              "type": "array",
+              "description": "Allowed origins for CORS",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allow_methods": {
+              "type": "array",
+              "description": "Allowed HTTP methods for CORS",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allow_headers": {
+              "type": "array",
+              "description": "Allowed headers for CORS",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allow_credentials": {
+              "type": "boolean",
+              "description": "Whether to allow credentials in CORS requests"
+            },
+            "allow_origin_regex": {
+              "type": "string",
+              "description": "Regex pattern for allowed origins"
+            },
+            "expose_headers": {
+              "type": "array",
+              "description": "Headers to expose in CORS responses",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_age": {
+              "type": "number",
+              "description": "Maximum age for CORS preflight cache",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "callbacks": {
+      "type": "object",
+      "description": "Callbacks configuration",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to callbacks module"
+        }
+      },
+      "required": ["path"],
+      "additionalProperties": false
+    },
+    "bundler": {
+      "type": "object",
+      "description": "Bundler configuration",
+      "properties": {
+        "externals": {
+          "type": "array",
+          "description": "External dependencies to exclude from bundling",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["cwd", "graphs"],
+  "additionalProperties": false
+}

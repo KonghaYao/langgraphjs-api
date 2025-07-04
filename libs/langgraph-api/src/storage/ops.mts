@@ -2,14 +2,12 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { type RunCommand } from "../command.mjs";
 import { checkpointer } from "./checkpoint.mjs";
-import { FileSystemPersistence } from "./persist.mjs";
 import { store } from "./store.mjs";
 import { database } from "./database.mjs";
 import { Assistant } from "../schemas.mjs";
 import { Threads } from "./threads.mjs";
 import { Runs, StreamManager } from "./runs.mjs";
 import { Assistants } from "./assistants.mjs";
-import { AssistantVersion, Thread } from "@langchain/langgraph-sdk";
 
 export type Metadata = Record<string, unknown>;
 
@@ -88,25 +86,6 @@ export interface Run {
   kwargs: RunKwargs;
   multitask_strategy: MultitaskStrategy;
 }
-
-interface Store {
-  runs: Record<string, Run>;
-  threads: Record<string, Thread>;
-  assistants: Record<string, typeof Assistant>;
-  assistant_versions: AssistantVersion[];
-  retry_counter: Record<string, number>;
-}
-
-export const conn = new FileSystemPersistence<Store>(
-  ".langgraphjs_ops.json",
-  () => ({
-    runs: {},
-    threads: {},
-    assistants: {},
-    assistant_versions: [],
-    retry_counter: {},
-  }),
-);
 
 export const truncate = async (flags: {
   runs?: boolean;

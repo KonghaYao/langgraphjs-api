@@ -21,7 +21,6 @@ export interface LanggraphConfig {
   http?: {
     app: string;
   };
-  // 忽略
   bundler?: {
     externals?: string[];
   };
