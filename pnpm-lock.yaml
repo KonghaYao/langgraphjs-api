@@ -191,6 +191,10 @@ importers:
       typescript:
         specifier: ^5.4.2
         version: 5.5.4
+    optionalDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.3
 
   libs/langgraph-cli:
     dependencies:

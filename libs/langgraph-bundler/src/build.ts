@@ -21,6 +21,10 @@ export interface LanggraphConfig {
   http?: {
     app: string;
   };
+  // 忽略
+  bundler?: {
+    externals?: string[];
+  };
 }
 
 interface BuildEntries {
@@ -257,7 +261,11 @@ export async function buildLanggraph(
         plugins: [
           nodeExternals({
             deps: false,
-            include: ['cloudflare:sockets', 'typescript'],
+            include: [
+              'cloudflare:sockets',
+              'typescript',
+              ...(config.bundler?.externals || []),
+            ],
           }),
         ],
         define: {
@@ -291,7 +299,12 @@ export async function buildLanggraph(
         plugins: [
           nodeExternals({
             deps: false,
-            include: ['cloudflare:sockets', 'typescript', 'better-sqlite3'],
+            include: [
+              'cloudflare:sockets',
+              'typescript',
+              'better-sqlite3',
+              ...(config.bundler?.externals || []),
+            ],
           }),
           condition({
             env: 'node-' + databaseType,

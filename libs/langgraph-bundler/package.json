@@ -1,13 +1,12 @@
 {
   "name": "@langgraph-js/bundler",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Build tool for LangGraph.js applications that packages graph configurations into deployable modules",
   "main": "dist/index.js",
   "type": "module",
   "types": "dist/index.d.ts",
   "bin": {
-    "langgraph-bundler": "./dist/cli.js",
-    "langgraph-dev": "./dist/dev.js"
+    "langgraph-js": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -48,6 +47,9 @@
   },
   "peerDependencies": {
     "@langgraph-js/api": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "tsx": "^4.19.2"
   },
   "engines": {
     "node": ">=18.0.0"
