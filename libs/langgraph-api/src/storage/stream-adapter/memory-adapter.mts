@@ -234,7 +234,7 @@ export class MemoryStreamAdapter extends StreamAdapter {
     return this.readers[runId];
   }
 
-  getControl(runId: string): ControlInterface | undefined {
+  async getControl(runId: string): Promise<ControlInterface | undefined> {
     if (this.control[runId] == null) return undefined;
     return this.control[runId];
   }
@@ -250,7 +250,7 @@ export class MemoryStreamAdapter extends StreamAdapter {
     return this.control[runId] != null;
   }
 
-  lock(runId: string): AbortSignal {
+  async lock(runId: string): Promise<AbortSignal> {
     if (this.control[runId] != null) {
       throw new Error("Run already locked");
     }

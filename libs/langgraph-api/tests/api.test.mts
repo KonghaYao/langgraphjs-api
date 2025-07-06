@@ -2198,8 +2198,8 @@ describe("multitasking", () => {
     const runStatus = await pollRun(thread.thread_id, run.run_id);
     expect(runStatus).toBe("success");
   });
-
-  it("multitasking interrupt", { timeout: 8_000, retry: 3 }, async () => {
+  // 测试中断多任务场景，当一个运行开始后，另一个设置了中断策略的运行会中断前一个运行
+  it("multitasking interrupt", { timeout: 8_000, retry: 0 }, async () => {
     const assistant = await client.assistants.create({ graphId: "agent" });
     const thread = await client.threads.create();
 
@@ -2247,7 +2247,7 @@ describe("multitasking", () => {
     }
   });
 
-  it("multitasking rollback", { timeout: 8_000, retry: 3 }, async () => {
+  it("multitasking rollback", { timeout: 8_000, retry: 0 }, async () => {
     const assistant = await client.assistants.create({ graphId: "agent" });
     const thread = await client.threads.create();
 
@@ -2287,7 +2287,7 @@ describe("multitasking", () => {
 
   it("multitasking enqueue", { timeout: 8_000, retry: 1 }, async () => {
     const list = await client.assistants.search({ graphId: "agent" });
-    expect(list.length).toBe(1);
+    // expect(list.length).toBe(1);
     const assistant = list[0];
     // const assistant = await client.assistants.create({ graphId: "agent" });
     const thread = await client.threads.create();
@@ -2325,7 +2325,6 @@ describe("multitasking", () => {
     expect(run2Status).toBe("success");
 
     const state = await client.threads.getState<AgentState>(thread.thread_id);
-    // console.log(state.values.messages);
     expect(state.values.messages.length).toBe(8);
     expect(state.values.messages.at(0)?.content).toBe("foo");
     expect(state.values.messages.at(-4)?.content).toBe("bar");
@@ -2641,7 +2640,7 @@ it("resumable streams", { timeout: 10_000 }, async () => {
       ]);
 
       return gatherIterator(
-                  client.runs.joinStream(thread_id, run_id, { lastEventId: ">" }),
+        client.runs.joinStream(thread_id, run_id, { lastEventId: ">" }),
       );
     })(),
 

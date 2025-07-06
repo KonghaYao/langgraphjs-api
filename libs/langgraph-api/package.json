@@ -1,6 +1,6 @@
 {
   "name": "@langgraph-js/api",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "type": "module",
   "engines": {
     "node": "^18.19.0 || >=20.0.0"
@@ -62,6 +62,7 @@
     "exit-hook": "^4.0.0",
     "hono": "^4.5.4",
     "langsmith": "^0.3.0",
+    "mitt": "^3.0.1",
     "open": "^10.1.0",
     "pg": "^8.15.6",
     "semver": "^7.7.1",

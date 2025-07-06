@@ -7,19 +7,24 @@ import {
 import { logError, logger } from "./logging.mjs";
 import { serializeError } from "./utils/serde.mjs";
 import { callWebhook } from "./webhook.mjs";
+import { eventBus } from "./events.mjs";
 
 const MAX_RETRY_ATTEMPTS = 3;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-export const queue = async () => {
-  while (true) {
-    for await (const { run, attempt, signal } of Runs.next()) {
-      await worker(run, attempt, signal);
-    }
+const waitingQueue = new Set();
 
-    // TODO: this is very suboptimal, we should implement subscription to the run
-    await sleep(1000 * Math.random());
-  }
+export const queue = async () => {
+  eventBus.on("run:put", async (event) => {
+    waitingQueue.add(event.run_id);
+    setTimeout(async () => {
+      if (waitingQueue.has(event.run_id)) {
+        waitingQueue.delete(event.run_id);
+        for await (const { run, attempt, signal } of Runs.next(event.run_id)) {
+          await worker(run, attempt, signal);
+        }
+      }
+    }, 100);
+  });
 };
 
 const worker = async (run: Run, attempt: number, abortSignal: AbortSignal) => {
@@ -95,7 +100,6 @@ const worker = async (run: Run, attempt: number, abortSignal: AbortSignal) => {
   } catch (error) {
     endedAt = new Date();
     if (error instanceof Error) exception = error;
-
     logError(error, {
       prefix: "Background run failed",
       context: {

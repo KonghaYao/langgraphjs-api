@@ -12,6 +12,7 @@ import {
 } from "./interface.js";
 import { SerializerProtocol } from "@langchain/langgraph-checkpoint";
 import { JsonPlusSerializer } from "./json-plus.js";
+import { logger } from "../../logging.mjs";
 
 // Redis 配置接口
 export interface RedisConfig {
@@ -401,8 +402,13 @@ class RedisCancellationAbortController
 
       this.client
         .eval(luaScript, 1, this.lockKey, this.lockValue)
-        .catch(() => {
+        .catch((error) => {
           // 忽略删除锁时的错误
+          logger.warn("Failed to delete lock", {
+            lock_key: this.lockKey,
+            lock_value: this.lockValue,
+            error: error,
+          });
         })
         .finally(() => {
           this.isLocked = false;

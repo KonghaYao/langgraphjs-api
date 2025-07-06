@@ -15,6 +15,7 @@ import {
 import { logError, logger } from "../logging.mjs";
 import { v4 as uuid4 } from "uuid";
 import type { AuthContext } from "../auth/index.mjs";
+import { eventBus } from "../events.mjs";
 
 const api = new Hono();
 
@@ -118,6 +119,7 @@ const createValidRun = async (
 
   if (first?.run_id === runId) {
     logger.info("Created run", { run_id: runId, thread_id: threadId });
+
     if (
       (multitaskStrategy === "interrupt" || multitaskStrategy === "rollback") &&
       inflight.length > 0
@@ -139,6 +141,9 @@ const createValidRun = async (
           },
         );
       }
+    }
+    if (first.status === "pending") {
+      eventBus.emit("run:put", { run_id: first.run_id, attempt: 0 });
     }
 
     return first;

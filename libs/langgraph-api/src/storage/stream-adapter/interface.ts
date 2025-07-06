@@ -41,13 +41,11 @@ export abstract class StreamAdapter {
     options: { ifNotFound: "create" | "ignore"; resumable?: boolean },
   ): QueueInterface | undefined;
 
-  abstract getControl(
-    runId: string,
-  ): ControlInterface | undefined | Promise<ControlInterface | undefined>;
+  abstract getControl(runId: string): Promise<ControlInterface | undefined>;
 
   abstract isLocked(runId: string): boolean | Promise<boolean>;
 
-  abstract lock(runId: string): AbortSignal | Promise<AbortSignal>;
+  abstract lock(runId: string): Promise<AbortSignal>;
 
   abstract unlock(runId: string): void | Promise<void>;
 

@@ -16,6 +16,7 @@ import { serializeError } from "../utils/serde.mjs";
 import { Threads } from "./threads.mjs";
 import { logger } from "../logging.mjs";
 import { StreamAdapterFactory } from "./stream-config.mjs";
+import { eventBus } from "../events.mjs";
 
 class AbortError extends Error {}
 
@@ -48,50 +49,72 @@ class InMemoryCounter {
 }
 export class Runs {
   static counter = new InMemoryCounter();
-  static async *next(): AsyncGenerator<{
+  static async *next(
+    // run_id 是可选参数，如果传入，则只返回该特定运行的运行信息。
+    // 如果不传入，则返回所有待处理的运行。
+    run_id?: string,
+  ): AsyncGenerator<{
     run: Run;
     attempt: number;
     signal: AbortSignal;
   }> {
-    // 获取待处理的运行列表
-    const now = new Date();
-    const { rows: pendingRuns } = await database.getPool().query(
-      `SELECT * FROM public.run
-       WHERE status = 'pending' AND created_at < $1
-       ORDER BY created_at ASC`,
-      [now],
-    );
+    const now = new Date(); // 获取当前时间，用于筛选在当前时间之前创建的待处理运行
+    let pendingRuns: Run[] = []; // 用于存储查询到的待处理运行列表
+
+    if (run_id) {
+      // 如果传入了 run_id，只查询该 run_id 对应的待处理运行
+      const { rows } = await database.getPool().query(
+        `SELECT * FROM public.run
+         WHERE run_id = $1 AND status = 'pending' AND created_at < $2`,
+        [run_id, now], // $1 为 run_id， $2 为当前时间
+      );
+      pendingRuns = rows; // 将查询结果赋值给 pendingRuns
+    } else {
+      // 如果没有传入 run_id，获取所有状态为 'pending' 且创建时间在当前时间之前的运行
+      // 结果按创建时间升序排列，确保先创建的运行先被处理
+      const { rows } = await database.getPool().query(
+        `SELECT * FROM public.run
+         WHERE status = 'pending' AND created_at < $1
+         ORDER BY created_at ASC`,
+        [now], // $1 为当前时间
+      );
+      pendingRuns = rows; // 将查询结果赋值给 pendingRuns
+    }
 
     if (!pendingRuns.length) {
+      // 如果没有找到任何待处理的运行，则直接返回，不继续执行
       return;
     }
 
-    // 使用独立的计数表来跟踪尝试次数
-    // 由于我们不再使用内存存储，使用临时表或其他方式维护重试计数
+    // 遍历所有待处理的运行
     for (const run of pendingRuns) {
-      const runId = run.run_id;
-      const threadId = run.thread_id;
+      const runId = run.run_id; // 获取当前运行的 ID
+      const threadId = run.thread_id; // 获取当前运行所属的线程 ID
 
-      // 验证线程存在
+      // 验证线程是否存在：确保每个运行都关联到一个有效的线程
       const { rows: threadRows } = await database
         .getPool()
         .query(`SELECT * FROM public.thread WHERE thread_id = $1`, [threadId]);
 
       if (threadRows.length === 0) {
+        // 如果线程不存在，打印警告信息并跳过当前运行，处理下一个运行
         console.warn(`Unexpected missing thread in Runs.next: ${threadId}`);
         continue;
       }
 
-      let lockAcquired = false;
+      let lockAcquired = false; // 标志位，用于判断是否成功获取到锁
       try {
-        // 直接尝试获取锁，避免 isLocked 和 lock 之间的竞态条件
+        // 尝试获取运行的锁。这是为了防止多个进程同时处理同一个运行。
+        // StreamManager.lock 会返回一个 AbortSignal，用于在处理中断时通知。
         const signal = await StreamManager.lock(runId);
-        lockAcquired = true;
+        lockAcquired = true; // 成功获取锁，设置标志位为 true
 
-        // 使用 InMemoryCounter 跟踪重试次数
-        Runs.counter.increment(runId);
-        const attempt = Runs.counter.get(runId);
+        // 使用 InMemoryCounter 跟踪当前运行的尝试次数
+        Runs.counter.increment(runId); // 增加该 runId 的尝试次数
+        const attempt = Runs.counter.get(runId); // 获取当前的尝试次数
 
+        // 使用 yield 返回运行信息、尝试次数和 AbortSignal
+        // 这样消费者可以异步迭代地获取待处理的运行
         yield {
           run: {
             run_id: run.run_id,
@@ -104,20 +127,22 @@ export class Runs {
             kwargs: run.kwargs,
             multitask_strategy: run.multitask_strategy,
           },
-          attempt,
-          signal,
+          attempt, // 当前运行的尝试次数
+          signal, // 用于取消操作的 AbortSignal
         };
       } catch (error) {
-        // 如果锁获取失败（已被其他进程锁定），跳过这个 run
+        // 如果在获取锁时发生错误
         if (error instanceof Error && error.message === "Run already locked") {
+          // 如果错误是"Run already locked"，表示该运行已被其他进程锁定，
+          // 此时跳过当前运行，处理下一个
           continue;
         }
-        // 其他错误重新抛出
+        // 对于其他类型的错误，重新抛出，中断迭代
         throw error;
       } finally {
-        // 只有在成功获取锁的情况下才释放锁
+        // 无论 try 块中是否发生错误，只要成功获取了锁，就必须释放锁
         if (lockAcquired) {
-          StreamManager.unlock(runId);
+          StreamManager.unlock(runId); // 释放对该运行的锁
         }
       }
     }
@@ -371,7 +396,6 @@ export class Runs {
         kwargs: newRun.kwargs,
         multitask_strategy: newRun.multitask_strategy,
       };
-
       return [result, ...inflightRuns];
     } catch (error) {
       await client.query("ROLLBACK");
@@ -593,10 +617,16 @@ export class Runs {
         const control = await StreamManager.getControl(runId);
         if (control) {
           control.abort(options.action ?? "interrupt");
+        } else {
+          logger.warn("Cancel run without stream control", {
+            run_id: runId,
+            thread_id: threadId,
+          });
         }
 
         if (run.status === "pending") {
           if (control || action !== "rollback") {
+            console.log("update status to interrupted");
             // 更新状态为interrupted
             await client.query(
               `UPDATE public.run 
@@ -613,7 +643,7 @@ export class Runs {
               [new Date(), run.thread_id],
             );
           } else {
-            console.info(
+            logger.info(
               "Eagerly deleting unscheduled run with rollback action",
               {
                 run_id: runId,
@@ -643,7 +673,7 @@ export class Runs {
     await Promise.all(promises);
 
     if (foundRunsCount === runIds.length) {
-      console.info("Cancelled runs", {
+      logger.info("Cancelled runs", {
         run_ids: runIds,
         thread_id: threadId,
         action,
