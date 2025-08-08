@@ -1,6 +1,6 @@
 {
   "name": "@langgraph-js/langgraph-pg",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -22,9 +22,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@langchain/langgraph-checkpoint": "^0.0.17",
-    "@langchain/langgraph-checkpoint-postgres": "^0.0.5",
-    "@langchain/langgraph-checkpoint-sqlite": "^0.1.5",
+    "@langchain/langgraph-checkpoint": "^0.1.0",
+    "@langchain/langgraph-checkpoint-postgres": "^0.1.1",
+    "@langchain/langgraph-checkpoint-sqlite": "^0.2.0",
     "better-sqlite3": "^11.10.0",
     "pg": "^8.15.6"
   },
