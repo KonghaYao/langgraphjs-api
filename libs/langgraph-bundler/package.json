@@ -1,5 +1,5 @@
 {
-  "name": "@langgraph-js/bundler",
+  "name": "@langgraph-js/cli",
   "version": "3.0.0",
   "description": "Build tool for LangGraph.js applications that packages graph configurations into deployable modules",
   "main": "dist/index.js",

@@ -16,7 +16,6 @@ import { serializeError } from "../utils/serde.mjs";
 import { Threads } from "./threads.mjs";
 import { logger } from "../logging.mjs";
 import { StreamAdapterFactory } from "./stream-config.mjs";
-import { eventBus } from "../events.mjs";
 
 class AbortError extends Error {}
 
