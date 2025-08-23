@@ -2342,7 +2342,7 @@ describe("RemoteGraph", () => {
   it.concurrent("stream values", async () => {
     const graph = new RemoteGraph({
       graphId: "agent",
-      client,
+      client: client as any,
       config: globalConfig,
     });
     const stream = await graph.stream(

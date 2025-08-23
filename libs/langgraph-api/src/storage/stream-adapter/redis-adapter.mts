@@ -94,7 +94,7 @@ class RedisQueue implements QueueInterface {
   }
 
   async push(item: Message): Promise<void> {
-    const [, serializedItemData] = this.serializer.dumpsTyped(item);
+    const [, serializedItemData] = await this.serializer.dumpsTyped(item);
     const serializedItem = new TextDecoder().decode(serializedItemData);
 
     if (this.resumable) {

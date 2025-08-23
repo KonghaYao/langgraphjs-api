@@ -18,7 +18,7 @@ import {
 } from "./utils/runnableConfig.mjs";
 import { callbacks } from "./storage/callback.js";
 
-type LangGraphStreamMode = Pregel<any, any>["streamMode"][number];
+export type LangGraphStreamMode = Pregel<any, any>["streamMode"][number];
 
 interface DebugTask {
   id: string;
