@@ -7,7 +7,7 @@ settings:
 overrides:
   esbuild: ^0.25.0
   vite: ^6.3.5
-  '@langchain/langgraph': 0.2.68
+  '@langchain/langgraph': 0.4.6
 
 importers:
 
@@ -94,8 +94,8 @@ importers:
         specifier: ^4.5.4
         version: 4.6.16
       langsmith:
-        specifier: ^0.2.15
-        version: 0.2.15
+        specifier: ^0.3.33
+        version: 0.3.63
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
@@ -131,17 +131,17 @@ importers:
         version: 3.24.1
     devDependencies:
       '@langchain/core':
-        specifier: ^0.3.42
-        version: 0.3.42
+        specifier: ^0.3.59
+        version: 0.3.72
       '@langchain/langgraph':
-        specifier: 0.2.68
-        version: 0.2.68(@langchain/core@0.3.42)(zod-to-json-schema@3.24.1(zod@3.24.1))
+        specifier: 0.4.6
+        version: 0.4.6(@langchain/core@0.3.72)(zod-to-json-schema@3.24.1(zod@3.24.1))
       '@langchain/langgraph-checkpoint':
-        specifier: ~0.0.17
-        version: 0.0.17(@langchain/core@0.3.42)
+        specifier: ^0.1.0
+        version: 0.1.0(@langchain/core@0.3.72)
       '@langchain/langgraph-sdk':
-        specifier: ^0.0.84
-        version: 0.0.84(@langchain/core@0.3.42)
+        specifier: ^0.0.105
+        version: 0.0.105(@langchain/core@0.3.72)
       '@types/babel__code-frame':
         specifier: ^7.0.6
         version: 7.0.6
@@ -180,7 +180,7 @@ importers:
     dependencies:
       '@langgraph-js/api':
         specifier: ^1.0.0
-        version: 1.0.4(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))(@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.42))(@langchain/langgraph@0.2.68(@langchain/core@0.3.42)(zod-to-json-schema@3.24.1(zod@3.24.1)))(@types/pg@8.15.1)(typescript@5.5.4)
+        version: 1.0.4(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72))(@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.72))(@langchain/langgraph@0.4.6(@langchain/core@0.3.72)(zod-to-json-schema@3.24.1(zod@3.24.1)))(@types/pg@8.15.1)(typescript@5.5.4)
       rollup-plugin-node-externals:
         specifier: ^8.0.0
         version: 8.0.0(rollup@4.40.2)
@@ -278,14 +278,14 @@ importers:
   libs/langgraph-pg:
     dependencies:
       '@langchain/langgraph-checkpoint':
-        specifier: ^0.0.17
-        version: 0.0.17(@langchain/core@0.3.42)
+        specifier: ^0.1.0
+        version: 0.1.0(@langchain/core@0.3.72)
       '@langchain/langgraph-checkpoint-postgres':
-        specifier: ^0.0.5
-        version: 0.0.5(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))
+        specifier: ^0.1.1
+        version: 0.1.1(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72))
       '@langchain/langgraph-checkpoint-sqlite':
-        specifier: ^0.1.5
-        version: 0.1.5(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))
+        specifier: ^0.2.0
+        version: 0.2.0(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72))
       better-sqlite3:
         specifier: ^11.10.0
         version: 11.10.0
@@ -548,8 +548,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
-  '@langchain/core@0.3.42':
-    resolution: {integrity: sha512-pT/jC5lqWK3YGDq8dQwgKoa6anqAhMtG1x5JbnrOj9NdaLeBbCKBDQ+/Ykzk3nZ8o+0UMsaXNZo7IVL83VVjHg==}
+  '@langchain/core@0.3.72':
+    resolution: {integrity: sha512-WsGWVZYnlKffj2eEfDocPNiaTRoxyYiLSQdQ7oxZvxGZBqo/90vpjbC33UGK1uPNBM4kT+pkdaol/MnvKUh8TQ==}
     engines: {node: '>=18'}
 
   '@langchain/langgraph-checkpoint-postgres@0.0.5':
@@ -559,6 +559,13 @@ packages:
       '@langchain/core': '>=0.2.31 <0.4.0'
       '@langchain/langgraph-checkpoint': ~0.0.15
 
+  '@langchain/langgraph-checkpoint-postgres@0.1.1':
+    resolution: {integrity: sha512-+Woc9yjSwG0ejG/GWcA75j1Fe4eNVCI0wN1psuZ3YarwhjSyEXtAbVPV92soAmKo10AdUpMyANYgutFfYxryzw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+      '@langchain/langgraph-checkpoint': ^0.1.0
+
   '@langchain/langgraph-checkpoint-sqlite@0.1.5':
     resolution: {integrity: sha512-Bn8YRbSGacPOEAO1cwAhXcdgEKNjht12sXTd8FnHJAVEhHS8WtFEgwDTsZLbfmQitCB2vwkfLARJRGxjIh9RNg==}
     engines: {node: '>=18'}
@@ -566,11 +573,52 @@ packages:
       '@langchain/core': '>=0.2.31 <0.4.0'
       '@langchain/langgraph-checkpoint': ~0.0.15
 
+  '@langchain/langgraph-checkpoint-sqlite@0.2.0':
+    resolution: {integrity: sha512-z+A7Q/ian2e2A5l6cvQPH2Np7pK/m3qet1u5poTnSzha0odhihZnJeBsYGK3CXRqWunPss0M8wukklQ658FlHw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+      '@langchain/langgraph-checkpoint': ^0.1.0
+
   '@langchain/langgraph-checkpoint@0.0.17':
     resolution: {integrity: sha512-6b3CuVVYx+7x0uWLG+7YXz9j2iBa+tn2AXvkLxzEvaAsLE6Sij++8PPbS2BZzC+S/FPJdWsz6I5bsrqL0BYrCA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.2.31 <0.4.0'
+
+  '@langchain/langgraph-checkpoint@0.1.0':
+    resolution: {integrity: sha512-7oY5b0VQSxcV3DgoHdXiCgBhEzml/ZjZfKNeuq6oZ3ggcdUICa/fzrIBbFju6gxPU8ly93s0OsjF4yURnHw70Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+
+  '@langchain/langgraph-sdk@0.0.105':
+    resolution: {integrity: sha512-3DD1W1wnbP48807qq+5gY248mFcwwNGqKdmZt05P3zeLpfP5Sfm6ELzVvqHGpr+qumP0yGRZs/7qArYGXRRfcQ==}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
+    peerDependenciesMeta:
+      '@langchain/core':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@langchain/langgraph-sdk@0.0.109':
+    resolution: {integrity: sha512-UpjL0c681CJqvKxgWD8o9fwUXRZzcDfsz8EcJ2PkXFxQFKRLe4QKZMtBr4OKFTR94pJtlOuTVla4OV5I5w+mdQ==}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
+    peerDependenciesMeta:
+      '@langchain/core':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   '@langchain/langgraph-sdk@0.0.84':
     resolution: {integrity: sha512-l0PFQyJ+6m6aclORNPPWlcRwgKcXVXsPaJCbCUYFABR3yf4cOpsjhUNR0cJ7+2cS400oieHjGRdGGyO/hbSjhg==}
@@ -583,11 +631,11 @@ packages:
       react:
         optional: true
 
-  '@langchain/langgraph@0.2.68':
-    resolution: {integrity: sha512-wxdGmOeRUQutCWfdKwFb+92RMdZZ8jvXkG7PD3ZcVLiuOXhC9LSe5xcc1UbWHcV29fV542IDHMfvf2OVdv9dZQ==}
+  '@langchain/langgraph@0.4.6':
+    resolution: {integrity: sha512-4ivuy6PWMvgE7mOByePdJ88Mk7JpoC+nZ6SB0g9qhX3oZtIA5d3Fswtcr5hgS3XlYaTtr5hJRYdXBehZ3JNX3Q==}
     engines: {node: '>=18'}
     peerDependencies:
-      '@langchain/core': '>=0.2.36 <0.3.0 || >=0.3.40 < 0.4.0'
+      '@langchain/core': '>=0.3.58 < 0.4.0'
       zod-to-json-schema: ^3.x
     peerDependenciesMeta:
       zod-to-json-schema:
@@ -598,7 +646,7 @@ packages:
     engines: {node: ^18.19.0 || >=20.0.0}
     peerDependencies:
       '@langchain/core': ^0.3.42
-      '@langchain/langgraph': 0.2.68
+      '@langchain/langgraph': 0.4.6
       '@langchain/langgraph-checkpoint': ~0.0.16
       '@langchain/langgraph-sdk': ^0.0.84
       '@types/pg': ^8.15.1
@@ -972,6 +1020,10 @@ packages:
     resolution: {integrity: sha512-aGtmf24DW6MLHHG5gCx4zaI3uBq3KRtxeVs0DjFH6Z0rDNbsvTxFASFvdj79pxjxZ8/5u3PIiN3IwEIQkiiuPw==}
     engines: {node: '>=12'}
 
+  chalk@4.1.2:
+    resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
+    engines: {node: '>=10'}
+
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
     engines: {node: '>= 16'}
@@ -1024,6 +1076,9 @@ packages:
   commander@13.0.0:
     resolution: {integrity: sha512-oPYleIY8wmTVzkvQq10AEok6YcTC4sRUBl8F9gVuwchGVUCTbl/vhLTaQqutuuySYOsu8YTgV+OxKc/8Yvx+mQ==}
     engines: {node: '>=18'}
+
+  console-table-printer@2.14.6:
+    resolution: {integrity: sha512-MCBl5HNVaFuuHW6FGbL/4fB7N/ormCy+tQ+sxTrF6QtSbSNETvPuOVbkJBhzDgYhvjWGrTma4eYJa37ZuoQsPw==}
 
   copy-anything@3.0.5:
     resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
@@ -1230,6 +1285,10 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  has-flag@4.0.0:
+    resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
+    engines: {node: '>=8'}
+
   hono@4.6.16:
     resolution: {integrity: sha512-iE6xOPwDYlfnZFwk6BfIMMIH4WZm3pPhz6rc1uJM/OPew0pjG5K6p8WTLaMBY1/szF/T0TaEjprMpwn16BA0NQ==}
     engines: {node: '>=16.9.0'}
@@ -1325,6 +1384,23 @@ packages:
     peerDependencies:
       openai: '*'
     peerDependenciesMeta:
+      openai:
+        optional: true
+
+  langsmith@0.3.63:
+    resolution: {integrity: sha512-GrioB7LOUksKIYsdYbBUwyD3ezy+OAQ5eu5vebytMsX3wT0xfW4rbM+vHqCY7RgZwUYLR/RlpuC18pdO+NqugA==}
+    peerDependencies:
+      '@opentelemetry/api': '*'
+      '@opentelemetry/exporter-trace-otlp-proto': '*'
+      '@opentelemetry/sdk-trace-base': '*'
+      openai: '*'
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+      '@opentelemetry/exporter-trace-otlp-proto':
+        optional: true
+      '@opentelemetry/sdk-trace-base':
+        optional: true
       openai:
         optional: true
 
@@ -1771,6 +1847,9 @@ packages:
   simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
 
+  simple-wcswidth@1.1.2:
+    resolution: {integrity: sha512-j7piyCjAeTDSjzTSQ7DokZtMNwNlEAyxqSZeCS+CXH7fJ4jx3FuJ/mTW3mE+6JLs4VJBbcll0Kjn+KXI5t21Iw==}
+
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
@@ -1831,6 +1910,10 @@ packages:
   superjson@2.2.2:
     resolution: {integrity: sha512-5JRxVqC8I8NuOUjzBbvVJAKNM8qoVuH0O77h4WInc/qC2q5IreqKxYwgkga3PfA22OayK2ikceb/B26dztPl+Q==}
     engines: {node: '>=16'}
+
+  supports-color@7.2.0:
+    resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
+    engines: {node: '>=8'}
 
   tailwindcss@4.0.11:
     resolution: {integrity: sha512-GZ6+tNwieqvpFLZfx2tkZpfOMAK7iumbOJOLmd6v8AcYuHbjUb+cmDRu6l+rFkIqarh5FfLbCSRJhegcVdoPng==}
@@ -2087,6 +2170,9 @@ packages:
   zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
 
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -2225,72 +2311,114 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
-  '@langchain/core@0.3.42':
+  '@langchain/core@0.3.72':
     dependencies:
       '@cfworker/json-schema': 4.1.0
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.16
-      langsmith: 0.2.15
+      langsmith: 0.3.63
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 10.0.0
-      zod: 3.24.1
-      zod-to-json-schema: 3.24.1(zod@3.24.1)
+      zod: 3.25.76
+      zod-to-json-schema: 3.24.1(zod@3.25.76)
     transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - '@opentelemetry/exporter-trace-otlp-proto'
+      - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/langgraph-checkpoint-postgres@0.0.5(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))':
+  '@langchain/langgraph-checkpoint-postgres@0.0.5(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72))':
     dependencies:
-      '@langchain/core': 0.3.42
-      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.42)
+      '@langchain/core': 0.3.72
+      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.72)
       pg: 8.15.6
     transitivePeerDependencies:
       - pg-native
 
-  '@langchain/langgraph-checkpoint-sqlite@0.1.5(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))':
+  '@langchain/langgraph-checkpoint-postgres@0.1.1(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72))':
     dependencies:
-      '@langchain/core': 0.3.42
-      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.42)
+      '@langchain/core': 0.3.72
+      '@langchain/langgraph-checkpoint': 0.1.0(@langchain/core@0.3.72)
+      pg: 8.15.6
+    transitivePeerDependencies:
+      - pg-native
+
+  '@langchain/langgraph-checkpoint-sqlite@0.1.5(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72))':
+    dependencies:
+      '@langchain/core': 0.3.72
+      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.72)
       better-sqlite3: 11.10.0
 
-  '@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42)':
+  '@langchain/langgraph-checkpoint-sqlite@0.2.0(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72))':
     dependencies:
-      '@langchain/core': 0.3.42
+      '@langchain/core': 0.3.72
+      '@langchain/langgraph-checkpoint': 0.1.0(@langchain/core@0.3.72)
+      better-sqlite3: 11.10.0
+
+  '@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72)':
+    dependencies:
+      '@langchain/core': 0.3.72
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.42)':
+  '@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72)':
+    dependencies:
+      '@langchain/core': 0.3.72
+      uuid: 10.0.0
+
+  '@langchain/langgraph-sdk@0.0.105(@langchain/core@0.3.72)':
     dependencies:
       '@types/json-schema': 7.0.15
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
     optionalDependencies:
-      '@langchain/core': 0.3.42
+      '@langchain/core': 0.3.72
 
-  '@langchain/langgraph@0.2.68(@langchain/core@0.3.42)(zod-to-json-schema@3.24.1(zod@3.24.1))':
+  '@langchain/langgraph-sdk@0.0.109(@langchain/core@0.3.72)':
     dependencies:
-      '@langchain/core': 0.3.42
-      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.42)
-      '@langchain/langgraph-sdk': 0.0.84(@langchain/core@0.3.42)
+      '@types/json-schema': 7.0.15
+      p-queue: 6.6.2
+      p-retry: 4.6.2
+      uuid: 9.0.1
+    optionalDependencies:
+      '@langchain/core': 0.3.72
+
+  '@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.72)':
+    dependencies:
+      '@types/json-schema': 7.0.15
+      p-queue: 6.6.2
+      p-retry: 4.6.2
+      uuid: 9.0.1
+    optionalDependencies:
+      '@langchain/core': 0.3.72
+    optional: true
+
+  '@langchain/langgraph@0.4.6(@langchain/core@0.3.72)(zod-to-json-schema@3.24.1(zod@3.24.1))':
+    dependencies:
+      '@langchain/core': 0.3.72
+      '@langchain/langgraph-checkpoint': 0.1.0(@langchain/core@0.3.72)
+      '@langchain/langgraph-sdk': 0.0.109(@langchain/core@0.3.72)
       uuid: 10.0.0
-      zod: 3.24.1
+      zod: 3.25.76
     optionalDependencies:
       zod-to-json-schema: 3.24.1(zod@3.24.1)
     transitivePeerDependencies:
       - react
+      - react-dom
 
-  '@langgraph-js/api@1.0.4(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))(@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.42))(@langchain/langgraph@0.2.68(@langchain/core@0.3.42)(zod-to-json-schema@3.24.1(zod@3.24.1)))(@types/pg@8.15.1)(typescript@5.5.4)':
+  '@langgraph-js/api@1.0.4(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72))(@langchain/langgraph-sdk@0.0.84(@langchain/core@0.3.72))(@langchain/langgraph@0.4.6(@langchain/core@0.3.72)(zod-to-json-schema@3.24.1(zod@3.24.1)))(@types/pg@8.15.1)(typescript@5.5.4)':
     dependencies:
       '@babel/code-frame': 7.26.2
       '@hono/node-server': 1.13.7(hono@4.6.16)
       '@hono/zod-validator': 0.2.2(hono@4.6.16)(zod@3.24.1)
-      '@langchain/core': 0.3.42
-      '@langchain/langgraph': 0.2.68(@langchain/core@0.3.42)(zod-to-json-schema@3.24.1(zod@3.24.1))
-      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.42)
-      '@langgraph-js/langgraph-pg': 2.0.1(@langchain/core@0.3.42)
+      '@langchain/core': 0.3.72
+      '@langchain/langgraph': 0.4.6(@langchain/core@0.3.72)(zod-to-json-schema@3.24.1(zod@3.24.1))
+      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.72)
+      '@langgraph-js/langgraph-pg': 2.0.1(@langchain/core@0.3.72)
       '@types/json-schema': 7.0.15
       '@types/pg': 8.15.1
       '@typescript/vfs': 1.6.0(typescript@5.5.4)
@@ -2311,18 +2439,18 @@ snapshots:
       winston-console-format: 1.0.8
       zod: 3.24.1
     optionalDependencies:
-      '@langchain/langgraph-sdk': 0.0.84(@langchain/core@0.3.42)
+      '@langchain/langgraph-sdk': 0.0.84(@langchain/core@0.3.72)
     transitivePeerDependencies:
       - babel-plugin-macros
       - openai
       - pg-native
       - supports-color
 
-  '@langgraph-js/langgraph-pg@2.0.1(@langchain/core@0.3.42)':
+  '@langgraph-js/langgraph-pg@2.0.1(@langchain/core@0.3.72)':
     dependencies:
-      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.42)
-      '@langchain/langgraph-checkpoint-postgres': 0.0.5(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))
-      '@langchain/langgraph-checkpoint-sqlite': 0.1.5(@langchain/core@0.3.42)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.42))
+      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.72)
+      '@langchain/langgraph-checkpoint-postgres': 0.0.5(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72))
+      '@langchain/langgraph-checkpoint-sqlite': 0.1.5(@langchain/core@0.3.72)(@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.72))
       better-sqlite3: 11.10.0
       pg: 8.15.6
     transitivePeerDependencies:
@@ -2629,6 +2757,11 @@ snapshots:
       loupe: 3.1.2
       pathval: 2.0.0
 
+  chalk@4.1.2:
+    dependencies:
+      ansi-styles: 4.3.0
+      supports-color: 7.2.0
+
   check-error@2.1.1: {}
 
   chokidar@4.0.3:
@@ -2673,6 +2806,10 @@ snapshots:
   commander@10.0.1: {}
 
   commander@13.0.0: {}
+
+  console-table-printer@2.14.6:
+    dependencies:
+      simple-wcswidth: 1.1.2
 
   copy-anything@3.0.5:
     dependencies:
@@ -2876,6 +3013,8 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
+  has-flag@4.0.0: {}
+
   hono@4.6.16: {}
 
   human-signals@8.0.0: {}
@@ -2952,6 +3091,16 @@ snapshots:
     dependencies:
       '@types/uuid': 10.0.0
       commander: 10.0.1
+      p-queue: 6.6.2
+      p-retry: 4.6.2
+      semver: 7.7.1
+      uuid: 10.0.0
+
+  langsmith@0.3.63:
+    dependencies:
+      '@types/uuid': 10.0.0
+      chalk: 4.1.2
+      console-table-printer: 2.14.6
       p-queue: 6.6.2
       p-retry: 4.6.2
       semver: 7.7.1
@@ -3363,6 +3512,8 @@ snapshots:
     dependencies:
       is-arrayish: 0.3.2
 
+  simple-wcswidth@1.1.2: {}
+
   sisteransi@1.0.5: {}
 
   source-map-js@1.2.1: {}
@@ -3414,6 +3565,10 @@ snapshots:
   superjson@2.2.2:
     dependencies:
       copy-anything: 3.0.5
+
+  supports-color@7.2.0:
+    dependencies:
+      has-flag: 4.0.0
 
   tailwindcss@4.0.11: {}
 
@@ -3660,5 +3815,12 @@ snapshots:
   zod-to-json-schema@3.24.1(zod@3.24.1):
     dependencies:
       zod: 3.24.1
+    optional: true
+
+  zod-to-json-schema@3.24.1(zod@3.25.76):
+    dependencies:
+      zod: 3.25.76
 
   zod@3.24.1: {}
+
+  zod@3.25.76: {}

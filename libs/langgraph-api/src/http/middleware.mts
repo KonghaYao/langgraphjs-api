@@ -1,19 +1,16 @@
 import { MiddlewareHandler } from "hono";
 import { cors as honoCors } from "hono/cors";
+interface CORSOptions {
+  allow_origins?: string[];
+  allow_origin_regex?: string;
+  allow_methods?: string[];
+  allow_headers?: string[];
+  allow_credentials?: boolean;
+  expose_headers?: string[];
+  max_age?: number;
+}
 
-export const cors = (
-  cors:
-    | {
-        allow_origins?: string[];
-        allow_origin_regex?: string;
-        allow_methods?: string[];
-        allow_headers?: string[];
-        allow_credentials?: boolean;
-        expose_headers?: string[];
-        max_age?: number;
-      }
-    | undefined,
-): MiddlewareHandler => {
+export const cors = (cors: CORSOptions | undefined): MiddlewareHandler => {
   if (cors == null) {
     return honoCors({
       origin: "*",
@@ -51,14 +48,24 @@ export const cors = (
   }
 
   // TODO: handle `cors.allow_credentials`
-  return honoCors({
+  const corsOptions = {
     origin,
     maxAge: cors.max_age,
     allowMethods: cors.allow_methods,
     allowHeaders: cors.allow_headers,
     credentials: cors.allow_credentials,
     exposeHeaders: cors.expose_headers,
+  };
+  // 移除值为 undefined 或 null 的键, 避免 cors 定义错误
+  Object.keys(corsOptions).forEach((key) => {
+    if (
+      corsOptions[key as keyof typeof corsOptions] === undefined ||
+      corsOptions[key as keyof typeof corsOptions] === null
+    ) {
+      delete corsOptions[key as keyof typeof corsOptions];
+    }
   });
+  return honoCors(corsOptions);
 };
 
 // This is used to match the behavior of the original LangGraph API

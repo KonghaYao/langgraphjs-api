@@ -20,7 +20,7 @@
   "resolutions": {
     "esbuild": "^0.25.0",
     "vite": "^6.3.5",
-    "@langchain/langgraph": "0.2.68"
+    "@langchain/langgraph": "0.4.6"
   },
   "keywords": [],
   "devDependencies": {

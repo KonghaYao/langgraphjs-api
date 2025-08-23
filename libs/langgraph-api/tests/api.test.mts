@@ -979,58 +979,53 @@ describe("runs", () => {
     expect(run.status).toBe("success");
   });
 
-  it.concurrent(
-    "human in the loop - no modification",
-    { retry: 3 },
-    async () => {
-      const assistant = await client.assistants.create({ graphId: "agent" });
-      const thread = await client.threads.create();
-      const input = {
-        messages: [{ type: "human", content: "foo", id: "initial-message" }],
-      };
-      let messages: BaseMessage[] = [];
+  it.concurrent("human in the loop - no modification", async () => {
+    const assistant = await client.assistants.create({ graphId: "agent" });
+    const thread = await client.threads.create();
+    const input = {
+      messages: [{ type: "human", content: "foo", id: "initial-message" }],
+    };
+    let messages: BaseMessage[] = [];
 
-      // (1) interrupt and then continue running, no modification
-      // run until the interrupt
-      let chunks = await gatherIterator(
-        client.runs.stream(thread.thread_id, assistant.assistant_id, {
-          input,
-          interruptBefore: ["tool"],
-          config: globalConfig,
-        }),
-      );
+    // (1) interrupt and then continue running, no modification
+    // run until the interrupt
+    let chunks = await gatherIterator(
+      client.runs.stream(thread.thread_id, assistant.assistant_id, {
+        input,
+        interruptBefore: ["tool"],
+        config: globalConfig,
+      }),
+    );
 
-      expect(chunks.filter((i) => i.event === "error").length).toBe(0);
-      messages = findLast(chunks, (i) => i.event === "values")?.data.messages;
+    expect(chunks.filter((i) => i.event === "error").length).toBe(0);
+    messages = chunks[chunks.length - 2]?.data.messages;
+    const threadAfterInterrupt = await client.threads.get(thread.thread_id);
+    expect(threadAfterInterrupt.status).toBe("interrupted");
 
-      const threadAfterInterrupt = await client.threads.get(thread.thread_id);
-      expect(threadAfterInterrupt.status).toBe("interrupted");
+    expect(messages.at(-1)).not.toBeNull();
+    expect(messages.at(-1)?.content).toBe("begin");
 
-      expect(messages.at(-1)).not.toBeNull();
-      expect(messages.at(-1)?.content).toBe("begin");
+    const state = await client.threads.getState(thread.thread_id);
+    expect(state.next).toEqual(["tool"]);
 
-      const state = await client.threads.getState(thread.thread_id);
-      expect(state.next).toEqual(["tool"]);
+    // continue after interrupt
+    chunks = await gatherIterator(
+      client.runs.stream(thread.thread_id, assistant.assistant_id, {
+        input: null,
+        config: globalConfig,
+      }),
+    );
 
-      // continue after interrupt
-      chunks = await gatherIterator(
-        client.runs.stream(thread.thread_id, assistant.assistant_id, {
-          input: null,
-          config: globalConfig,
-        }),
-      );
+    expect(chunks.filter((i) => i.event === "error").length).toBe(0);
+    messages = findLast(chunks, (i) => i.event === "values")?.data.messages;
+    // expect(messages.map((i) => i.type)).toEqual(["human", "ai", "ai"]);
+    expect(messages.length).toBe(4);
+    expect(messages[2].content).toBe("tool_call__begin");
+    expect(messages.at(-1)?.content).toBe("end");
 
-      expect(chunks.filter((i) => i.event === "error").length).toBe(0);
-      messages = findLast(chunks, (i) => i.event === "values")?.data.messages;
-      // expect(messages.map((i) => i.type)).toEqual(["human", "ai", "ai"]);
-      expect(messages.length).toBe(4);
-      expect(messages[2].content).toBe("tool_call__begin");
-      expect(messages.at(-1)?.content).toBe("end");
-
-      const threadAfterContinue = await client.threads.get(thread.thread_id);
-      expect(threadAfterContinue.status).toBe("idle");
-    },
-  );
+    const threadAfterContinue = await client.threads.get(thread.thread_id);
+    expect(threadAfterContinue.status).toBe("idle");
+  });
 
   it.concurrent("human in the loop - modification", async () => {
     // (2) interrupt, modify the message and then continue running
@@ -1053,10 +1048,7 @@ describe("runs", () => {
     expect(chunks.filter((i) => i.event === "error").length).toBe(0);
 
     // edit the last message
-    const lastMessage = findLast(
-      chunks,
-      (i) => i.event === "values",
-    )?.data.messages.at(-1);
+    const lastMessage = chunks[chunks.length - 2]?.data.messages.at(-1);
     lastMessage.content = "modified";
 
     // update state
@@ -1440,7 +1432,7 @@ describe("subgraphs", () => {
     );
 
     for (const chunk of chunks) {
-      if (chunk.event === "values") {
+      if (chunk.event === "values" && chunk?.data?.messages) {
         lastMessageBeforeInterrupt =
           chunk.data.messages[chunk.data.messages.length - 1];
       }
@@ -1485,6 +1477,13 @@ describe("subgraphs", () => {
             },
           ],
           route: "weather",
+        },
+        id: chunks[0].data.run_id,
+      },
+      {
+        event: "values",
+        data: {
+          __interrupt__: [],
         },
         id: chunks[0].data.run_id,
       },
@@ -1844,9 +1843,9 @@ describe("subgraphs", () => {
         interrupts: [
           {
             value: "i want to interrupt",
-            when: "during",
-            resumable: true,
-            ns: [expect.stringMatching(/^agent:/)],
+            // when: "during",
+            // resumable: true,
+            // ns: [expect.stringMatching(/^agent:/)],
           },
         ],
         checkpoint: null,
@@ -1861,9 +1860,9 @@ describe("subgraphs", () => {
       [state.tasks[0].id]: [
         {
           value: "i want to interrupt",
-          when: "during",
-          resumable: true,
-          ns: [expect.stringMatching(/^agent:/)],
+          // when: "during",
+          // resumable: true,
+          // ns: [expect.stringMatching(/^agent:/)],
         },
       ],
     });

@@ -5,7 +5,6 @@ import {
   START,
   END,
   messagesStateReducer,
-  SharedValue,
   interrupt,
   type LangGraphRunnableConfig,
 } from "@langchain/langgraph";
@@ -27,7 +26,11 @@ const GraphAnnotationOutput = Annotation.Root({
 
 const GraphAnnotationInput = Annotation.Root({
   ...GraphAnnotationOutput.spec,
-  sharedState: SharedValue.on("user_id"),
+  sharedState: Annotation<{
+    data: {
+      user_id: string;
+    };
+  }>(),
   sharedStateFromStoreConfig: Annotation<Record<string, any> | null>,
 });
 
