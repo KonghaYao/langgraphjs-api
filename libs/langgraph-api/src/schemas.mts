@@ -175,6 +175,11 @@ export const CommandSchema = z.object({
   resume: z.unknown().optional(),
 });
 
+export const LangsmithTracer = z.object({
+  project_name: z.string().optional(),
+  example_id: z.string().optional(),
+});
+
 export const RunCreate = z
   .object({
     assistant_id: z.union([z.string().uuid(), z.string()]),
@@ -228,6 +233,7 @@ export const RunCreate = z
     if_not_exists: z.enum(["reject", "create"]).optional(),
     on_completion: z.enum(["delete", "keep"]).optional(),
     feedback_keys: z.array(z.string()).optional(),
+    langsmith_tracer: LangsmithTracer.optional(),
   })
   .describe("Payload for creating a stateful run.");
 
@@ -416,6 +422,23 @@ export const ThreadStateUpdate = z
     as_node: z.string().optional(),
   })
   .describe("Payload for adding state to a thread.");
+
+export const ThreadHistoryRequest = z.object({
+  limit: z.number().optional().default(10),
+  before: z.string().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  checkpoint: z
+    .object({
+      checkpoint_id: z.string().uuid().optional(),
+      checkpoint_ns: z.string().optional(),
+      checkpoint_map: z.record(z.string(), z.unknown()).optional(),
+    })
+    .optional(),
+});
+
+export const ThreadPatchRequest = z.object({
+  metadata: z.record(z.string(), z.unknown()),
+});
 
 export const AssistantLatestVersion = z.object({
   version: z.number(),

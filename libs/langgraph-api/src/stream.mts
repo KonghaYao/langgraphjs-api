@@ -1,19 +1,21 @@
-import type { Run, RunnableConfig, Checkpoint } from "./storage/ops.mjs";
-import { getGraph } from "./graph/load.mjs";
-import { Client as LangSmithClient } from "langsmith";
-import {
-  type CheckpointMetadata,
-  type Interrupt,
-  type StateSnapshot,
+import { BaseMessageChunk, isBaseMessage } from "@langchain/core/messages";
+import { LangChainTracer } from "@langchain/core/tracers/tracer_langchain";
+import type {
+  BaseCheckpointSaver,
+  LangGraphRunnableConfig,
+  CheckpointMetadata,
+  Interrupt,
+  StateSnapshot,
 } from "@langchain/langgraph";
 import type { Pregel } from "@langchain/langgraph/pregel";
+import { Client as LangSmithClient, getDefaultProjectName } from "langsmith";
+import { getLangGraphCommand } from "./command.mjs";
+import { checkLangGraphSemver } from "./semver/index.mjs";
+import type { Checkpoint, Run, RunnableConfig } from "./storage/ops.mjs";
 import {
   runnableConfigToCheckpoint,
   taskRunnableConfigToCheckpoint,
 } from "./utils/runnableConfig.mjs";
-import { BaseMessageChunk, isBaseMessage } from "@langchain/core/messages";
-import { getLangGraphCommand } from "./command.mjs";
-import { checkLangGraphSemver } from "./semver/index.mjs";
 import { callbacks } from "./storage/callback.js";
 
 type LangGraphStreamMode = Pregel<any, any>["streamMode"][number];
@@ -143,8 +145,13 @@ let LANGGRAPH_VERSION: { name: string; version: string } | undefined;
 
 export async function* streamState(
   run: Run,
-  attempt: number = 1,
-  options?: {
+  options: {
+    attempt: number;
+    getGraph: (
+      graphId: string,
+      config: LangGraphRunnableConfig | undefined,
+      options?: { checkpointer?: BaseCheckpointSaver | null },
+    ) => Promise<Pregel<any, any, any, any, any>>;
     onCheckpoint?: (checkpoint: StreamCheckpoint) => void;
     onTaskResult?: (taskResult: StreamTaskResult) => void;
     signal?: AbortSignal;
@@ -157,7 +164,7 @@ export async function* streamState(
     throw new Error("Invalid or missing graph_id");
   }
 
-  const graph = await getGraph(graphId, kwargs.config, {
+  const graph = await options.getGraph(graphId, kwargs.config, {
     checkpointer: kwargs.temporary ? null : undefined,
   });
 
@@ -181,7 +188,7 @@ export async function* streamState(
 
   yield {
     event: "metadata",
-    data: { run_id: run.run_id, attempt },
+    data: { run_id: run.run_id, attempt: options.attempt },
   };
 
   // #if [!PROD]
@@ -193,12 +200,27 @@ export async function* streamState(
 
   const metadata = {
     ...kwargs.config?.metadata,
-    run_attempt: attempt,
+    run_attempt: options.attempt,
     langgraph_version: LANGGRAPH_VERSION?.version ?? "0.0.0",
     langgraph_plan: "developer",
     langgraph_host: "self-hosted",
     langgraph_api_url: process.env.LANGGRAPH_API_URL ?? undefined,
   };
+
+  const tracer = run.kwargs?.config?.configurable?.langsmith_project
+    ? new LangChainTracer({
+        replicas: [
+          [
+            run.kwargs?.config?.configurable?.langsmith_project as string,
+            {
+              reference_example_id:
+                run.kwargs?.config?.configurable?.langsmith_example_id,
+            },
+          ],
+          [getDefaultProjectName(), undefined],
+        ],
+      })
+    : undefined;
 
   const events = graph.streamEvents(
     kwargs.command != null
@@ -220,6 +242,7 @@ export async function* streamState(
       runId: run.run_id,
       streamMode: [...libStreamMode],
       signal: options?.signal,
+      ...(tracer && { callbacks: [tracer] }),
     },
   );
 

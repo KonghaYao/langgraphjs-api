@@ -1,22 +1,21 @@
+import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { streamSSE } from "hono/streaming";
-import { getAssistantId } from "../graph/load.mjs";
-import { zValidator } from "@hono/zod-validator";
-import * as schemas from "../schemas.mjs";
+import { v4 as uuid4 } from "uuid";
 import { z } from "zod";
+import type { AuthContext } from "../auth/index.mjs";
+import { getAssistantId } from "../graph/load.mjs";
+import { logError, logger } from "../logging.mjs";
+import * as schemas from "../schemas.mjs";
 import { type Run, type RunKwargs, Runs, Threads } from "../storage/ops.mjs";
-import { serialiseAsDict } from "../utils/serde.mjs";
 import {
   getDisconnectAbortSignal,
   jsonExtra,
   waitKeepAlive,
 } from "../utils/hono.mjs";
-import { logError, logger } from "../logging.mjs";
-import { v4 as uuid4 } from "uuid";
-import type { AuthContext } from "../auth/index.mjs";
+import { serialiseAsDict } from "../utils/serde.mjs";
 import { eventBus } from "../events.mjs";
-
 const api = new Hono();
 
 const createValidRun = async (
@@ -28,7 +27,7 @@ const createValidRun = async (
   },
 ): Promise<Run> => {
   const { assistant_id: assistantId, ...run } = payload;
-  const { auth, headers } = kwargs;
+  const { auth, headers } = kwargs ?? {};
   const runId = uuid4();
 
   const streamMode = Array.isArray(payload.stream_mode)
@@ -51,6 +50,14 @@ const createValidRun = async (
   if (run.checkpoint) {
     config.configurable ??= {};
     Object.assign(config.configurable, run.checkpoint);
+  }
+
+  if (run.langsmith_tracer) {
+    config.configurable ??= {};
+    Object.assign(config.configurable, {
+      langsmith_project: run.langsmith_tracer.project_name,
+      langsmith_example_id: run.langsmith_tracer.example_id,
+    });
   }
 
   if (headers) {

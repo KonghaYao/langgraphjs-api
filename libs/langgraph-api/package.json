@@ -31,6 +31,10 @@
       "types": "./dist/graph/parser/index.d.mts",
       "default": "./dist/graph/parser/index.mjs"
     },
+    "./experimental/embed": {
+      "types": "./dist/experimental/embed.d.mts",
+      "default": "./dist/experimental/embed.mjs"
+    },
     "./package.json": "./package.json"
   },
   "repository": {
@@ -61,7 +65,7 @@
     "dotenv": "^16.4.7",
     "exit-hook": "^4.0.0",
     "hono": "^4.5.4",
-    "langsmith": "^0.3.0",
+    "langsmith": "^0.3.33",
     "mitt": "^3.0.1",
     "open": "^10.1.0",
     "pg": "^8.15.6",
@@ -88,7 +92,7 @@
     }
   },
   "devDependencies": {
-    "@langchain/core": "^0.3.42",
+    "@langchain/core": "^0.3.59",
     "@langchain/langgraph": "^0.3.3",
     "@langchain/langgraph-checkpoint": "^0.0.17",
     "@langchain/langgraph-sdk": "^0.0.84",
