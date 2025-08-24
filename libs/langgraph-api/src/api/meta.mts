@@ -4,9 +4,11 @@ import * as url from "node:url";
 
 const api = new Hono();
 
+const packagePath = "../../package.json";
+const basePath = import.meta.url;
 // Get the version using the same pattern as semver/index.mts
 const packageJsonPath = url.fileURLToPath(
-  new URL("../../package.json", import.meta.url),
+  new URL(packagePath, basePath.toString()),
 );
 
 let version: string;

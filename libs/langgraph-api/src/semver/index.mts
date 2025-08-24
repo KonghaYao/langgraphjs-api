@@ -7,8 +7,9 @@ export async function checkSemver(
 ): Promise<
   { name: string; version: string; required: string; satisfies: boolean }[]
 > {
+  const basePath = import.meta.url;
   const packageJsonPath = url.fileURLToPath(
-    new URL("../../package.json", import.meta.url),
+    new URL("../../package.json", basePath.toString()),
   );
   const packageJson = JSON.parse(await fs.readFile(packageJsonPath, "utf-8"));
   const peerDependencies: Record<string, string> =
