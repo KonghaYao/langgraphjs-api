@@ -6,7 +6,7 @@ PRAGMA journal_mode = WAL;
 
 
 
-CREATE TABLE assistant (
+CREATE TABLE IF NOT EXISTS assistant (
     assistant_id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     graph_id TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -20,7 +20,7 @@ CREATE TABLE assistant (
 
 
 
-CREATE TABLE assistant_versions (
+CREATE TABLE IF NOT EXISTS assistant_versions (
     assistant_id TEXT NOT NULL,
     version INTEGER DEFAULT 1 NOT NULL,
     graph_id TEXT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE assistant_versions (
 );
 
 
-CREATE TABLE checkpoint_blobs (
+CREATE TABLE IF NOT EXISTS checkpoint_blobs (
     thread_id TEXT NOT NULL,
     channel TEXT NOT NULL,
     version TEXT NOT NULL,
@@ -44,11 +44,11 @@ CREATE TABLE checkpoint_blobs (
     FOREIGN KEY (thread_id) REFERENCES thread(thread_id) ON DELETE CASCADE
 );
 
-CREATE TABLE checkpoint_migrations (
+CREATE TABLE IF NOT EXISTS checkpoint_migrations (
     v INTEGER PRIMARY KEY
 );
 
-CREATE TABLE checkpoint_writes (
+CREATE TABLE IF NOT EXISTS checkpoint_writes (
     thread_id TEXT NOT NULL,
     checkpoint_id TEXT NOT NULL,
     task_id TEXT NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE checkpoint_writes (
 );
 
 
-CREATE TABLE checkpoints (
+CREATE TABLE IF NOT EXISTS checkpoints (
     thread_id TEXT NOT NULL,
     checkpoint_id TEXT NOT NULL,
     run_id TEXT,
@@ -76,7 +76,7 @@ CREATE TABLE checkpoints (
     FOREIGN KEY (thread_id) REFERENCES thread(thread_id) ON DELETE CASCADE
 );
 
-CREATE TABLE cron (
+CREATE TABLE IF NOT EXISTS cron (
     cron_id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     assistant_id TEXT,
     thread_id TEXT,
@@ -93,7 +93,7 @@ CREATE TABLE cron (
 );
 
 
-CREATE TABLE run (
+CREATE TABLE IF NOT EXISTS run (
     run_id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     thread_id TEXT NOT NULL,
     assistant_id TEXT NOT NULL,
@@ -108,13 +108,13 @@ CREATE TABLE run (
 );
 
 
-CREATE TABLE schema_migrations (
+CREATE TABLE IF NOT EXISTS schema_migrations (
     version INTEGER PRIMARY KEY,
     dirty BOOLEAN NOT NULL
 );
 
 
-CREATE TABLE store (
+CREATE TABLE IF NOT EXISTS store (
     prefix TEXT NOT NULL,
     key TEXT NOT NULL,
     value TEXT NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE store (
 );
 
 
-CREATE TABLE thread (
+CREATE TABLE IF NOT EXISTS thread (
     thread_id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -138,7 +138,7 @@ CREATE TABLE thread (
 );
 
 
-CREATE TABLE thread_ttl (
+CREATE TABLE IF NOT EXISTS thread_ttl (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     thread_id TEXT NOT NULL,
     strategy TEXT DEFAULT 'delete' NOT NULL,
@@ -152,50 +152,50 @@ CREATE TABLE thread_ttl (
 -- Indexes
 --
 
-CREATE INDEX assistant_created_at_idx ON assistant (created_at DESC);
-CREATE INDEX assistant_graph_id_idx ON assistant (graph_id, created_at DESC);
-CREATE INDEX checkpoints_checkpoint_id_idx ON checkpoints (thread_id, checkpoint_id DESC);
-CREATE INDEX checkpoints_run_id_idx ON checkpoints (run_id);
-CREATE INDEX idx_store_expires_at ON store (expires_at) WHERE expires_at IS NOT NULL;
-CREATE INDEX idx_thread_ttl_expires_at ON thread_ttl (expires_at);
-CREATE INDEX idx_thread_ttl_thread_id ON thread_ttl (thread_id);
-CREATE UNIQUE INDEX idx_thread_ttl_thread_strategy ON thread_ttl (thread_id, strategy);
-CREATE INDEX run_assistant_id_idx ON run (assistant_id);
-CREATE INDEX run_pending_idx ON run (created_at) WHERE status = 'pending';
-CREATE INDEX run_thread_id_status_idx ON run (thread_id, status);
-CREATE INDEX store_prefix_idx ON store (prefix);
-CREATE INDEX thread_created_at_idx ON thread (created_at DESC);
-CREATE INDEX thread_status_idx ON thread (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS assistant_created_at_idx ON assistant (created_at DESC);
+CREATE INDEX IF NOT EXISTS assistant_graph_id_idx ON assistant (graph_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS checkpoints_checkpoint_id_idx ON checkpoints (thread_id, checkpoint_id DESC);
+CREATE INDEX IF NOT EXISTS checkpoints_run_id_idx ON checkpoints (run_id);
+CREATE INDEX IF NOT EXISTS idx_store_expires_at ON store (expires_at) WHERE expires_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_thread_ttl_expires_at ON thread_ttl (expires_at);
+CREATE INDEX IF NOT EXISTS idx_thread_ttl_thread_id ON thread_ttl (thread_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_thread_ttl_thread_strategy ON thread_ttl (thread_id, strategy);
+CREATE INDEX IF NOT EXISTS run_assistant_id_idx ON run (assistant_id);
+CREATE INDEX IF NOT EXISTS run_pending_idx ON run (created_at) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS run_thread_id_status_idx ON run (thread_id, status);
+CREATE INDEX IF NOT EXISTS store_prefix_idx ON store (prefix);
+CREATE INDEX IF NOT EXISTS thread_created_at_idx ON thread (created_at DESC);
+CREATE INDEX IF NOT EXISTS thread_status_idx ON thread (status, created_at DESC);
 
 
 -- Triggers
 
 -- Triggers for updated_at timestamps
-CREATE TRIGGER assistant_updated_at_trigger 
+CREATE TRIGGER IF NOT EXISTS assistant_updated_at_trigger 
     AFTER UPDATE ON assistant 
     BEGIN 
         UPDATE assistant SET updated_at = CURRENT_TIMESTAMP WHERE assistant_id = NEW.assistant_id;
     END;
 
-CREATE TRIGGER cron_updated_at_trigger 
+CREATE TRIGGER IF NOT EXISTS cron_updated_at_trigger 
     AFTER UPDATE ON cron 
     BEGIN 
         UPDATE cron SET updated_at = CURRENT_TIMESTAMP WHERE cron_id = NEW.cron_id;
     END;
 
-CREATE TRIGGER run_updated_at_trigger 
+CREATE TRIGGER IF NOT EXISTS run_updated_at_trigger 
     AFTER UPDATE ON run 
     BEGIN 
         UPDATE run SET updated_at = CURRENT_TIMESTAMP WHERE run_id = NEW.run_id;
     END;
 
-CREATE TRIGGER thread_updated_at_trigger 
+CREATE TRIGGER IF NOT EXISTS thread_updated_at_trigger 
     AFTER UPDATE ON thread 
     BEGIN 
         UPDATE thread SET updated_at = CURRENT_TIMESTAMP WHERE thread_id = NEW.thread_id;
     END;
 
-CREATE TRIGGER store_updated_at_trigger 
+CREATE TRIGGER IF NOT EXISTS store_updated_at_trigger 
     AFTER UPDATE ON store 
     BEGIN 
         UPDATE store SET updated_at = CURRENT_TIMESTAMP WHERE prefix = NEW.prefix AND key = NEW.key;

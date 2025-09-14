@@ -45,7 +45,7 @@ SET default_table_access_method = heap;
 -- Name: assistant; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.assistant (
+CREATE TABLE IF NOT EXISTS public.assistant (
     assistant_id uuid DEFAULT gen_random_uuid() NOT NULL,
     graph_id text NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
@@ -64,7 +64,7 @@ CREATE TABLE public.assistant (
 -- Name: assistant_versions; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.assistant_versions (
+CREATE TABLE IF NOT EXISTS public.assistant_versions (
     assistant_id uuid NOT NULL,
     version integer DEFAULT 1 NOT NULL,
     graph_id text NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE public.assistant_versions (
 -- Name: checkpoint_blobs; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.checkpoint_blobs (
+CREATE TABLE IF NOT EXISTS public.checkpoint_blobs (
     thread_id uuid NOT NULL,
     channel text NOT NULL,
     version text NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE public.checkpoint_blobs (
 -- Name: checkpoint_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.checkpoint_migrations (
+CREATE TABLE IF NOT EXISTS public.checkpoint_migrations (
     v integer NOT NULL
 );
 
@@ -108,7 +108,7 @@ CREATE TABLE public.checkpoint_migrations (
 -- Name: checkpoint_writes; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.checkpoint_writes (
+CREATE TABLE IF NOT EXISTS public.checkpoint_writes (
     thread_id uuid NOT NULL,
     checkpoint_id uuid NOT NULL,
     task_id uuid NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE public.checkpoint_writes (
 -- Name: checkpoints; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.checkpoints (
+CREATE TABLE IF NOT EXISTS public.checkpoints (
     thread_id uuid NOT NULL,
     checkpoint_id uuid NOT NULL,
     run_id uuid,
@@ -143,7 +143,7 @@ CREATE TABLE public.checkpoints (
 -- Name: cron; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.cron (
+CREATE TABLE IF NOT EXISTS public.cron (
     cron_id uuid DEFAULT gen_random_uuid() NOT NULL,
     assistant_id uuid,
     thread_id uuid,
@@ -164,7 +164,7 @@ CREATE TABLE public.cron (
 -- Name: run; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.run (
+CREATE TABLE IF NOT EXISTS public.run (
     run_id uuid DEFAULT gen_random_uuid() NOT NULL,
     thread_id uuid NOT NULL,
     assistant_id uuid NOT NULL,
@@ -184,7 +184,7 @@ WITH (autovacuum_vacuum_scale_factor='0.01', autovacuum_vacuum_threshold='50', a
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.schema_migrations (
+CREATE TABLE IF NOT EXISTS public.schema_migrations (
     version bigint NOT NULL,
     dirty boolean NOT NULL
 );
@@ -196,7 +196,7 @@ CREATE TABLE public.schema_migrations (
 -- Name: store; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.store (
+CREATE TABLE IF NOT EXISTS public.store (
     prefix text NOT NULL,
     key text NOT NULL,
     value jsonb NOT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE public.store (
 -- Name: thread; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.thread (
+CREATE TABLE IF NOT EXISTS public.thread (
     thread_id uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
@@ -231,7 +231,7 @@ CREATE TABLE public.thread (
 -- Name: thread_ttl; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.thread_ttl (
+CREATE TABLE IF NOT EXISTS public.thread_ttl (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     thread_id uuid NOT NULL,
     strategy text DEFAULT 'delete'::text NOT NULL,
@@ -249,7 +249,7 @@ CREATE TABLE public.thread_ttl (
 --
 
 ALTER TABLE ONLY public.assistant
-    ADD CONSTRAINT assistant_pkey PRIMARY KEY (assistant_id);
+    ADD CONSTRAINT IF NOT EXISTS assistant_pkey PRIMARY KEY (assistant_id);
 
 
 --
@@ -257,7 +257,7 @@ ALTER TABLE ONLY public.assistant
 --
 
 ALTER TABLE ONLY public.assistant_versions
-    ADD CONSTRAINT assistant_versions_pkey PRIMARY KEY (assistant_id, version);
+    ADD CONSTRAINT IF NOT EXISTS assistant_versions_pkey PRIMARY KEY (assistant_id, version);
 
 
 --
@@ -265,7 +265,7 @@ ALTER TABLE ONLY public.assistant_versions
 --
 
 ALTER TABLE ONLY public.checkpoint_blobs
-    ADD CONSTRAINT checkpoint_blobs_pkey PRIMARY KEY (thread_id, checkpoint_ns, channel, version);
+    ADD CONSTRAINT IF NOT EXISTS checkpoint_blobs_pkey PRIMARY KEY (thread_id, checkpoint_ns, channel, version);
 
 
 --
@@ -273,7 +273,7 @@ ALTER TABLE ONLY public.checkpoint_blobs
 --
 
 ALTER TABLE ONLY public.checkpoint_migrations
-    ADD CONSTRAINT checkpoint_migrations_pkey PRIMARY KEY (v);
+    ADD CONSTRAINT IF NOT EXISTS checkpoint_migrations_pkey PRIMARY KEY (v);
 
 
 --
@@ -281,7 +281,7 @@ ALTER TABLE ONLY public.checkpoint_migrations
 --
 
 ALTER TABLE ONLY public.checkpoint_writes
-    ADD CONSTRAINT checkpoint_writes_pkey PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id, task_id, idx);
+    ADD CONSTRAINT IF NOT EXISTS checkpoint_writes_pkey PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id, task_id, idx);
 
 
 --
@@ -289,7 +289,7 @@ ALTER TABLE ONLY public.checkpoint_writes
 --
 
 ALTER TABLE ONLY public.checkpoints
-    ADD CONSTRAINT checkpoints_pkey PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id);
+    ADD CONSTRAINT IF NOT EXISTS checkpoints_pkey PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id);
 
 
 --
@@ -297,7 +297,7 @@ ALTER TABLE ONLY public.checkpoints
 --
 
 ALTER TABLE ONLY public.cron
-    ADD CONSTRAINT cron_pkey PRIMARY KEY (cron_id);
+    ADD CONSTRAINT IF NOT EXISTS cron_pkey PRIMARY KEY (cron_id);
 
 
 --
@@ -305,7 +305,7 @@ ALTER TABLE ONLY public.cron
 --
 
 ALTER TABLE ONLY public.run
-    ADD CONSTRAINT run_pkey PRIMARY KEY (run_id);
+    ADD CONSTRAINT IF NOT EXISTS run_pkey PRIMARY KEY (run_id);
 
 
 --
@@ -313,7 +313,7 @@ ALTER TABLE ONLY public.run
 --
 
 ALTER TABLE ONLY public.schema_migrations
-    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+    ADD CONSTRAINT IF NOT EXISTS schema_migrations_pkey PRIMARY KEY (version);
 
 
 --
@@ -321,7 +321,7 @@ ALTER TABLE ONLY public.schema_migrations
 --
 
 ALTER TABLE ONLY public.store
-    ADD CONSTRAINT store_pkey PRIMARY KEY (prefix, key);
+    ADD CONSTRAINT IF NOT EXISTS store_pkey PRIMARY KEY (prefix, key);
 
 
 --
@@ -329,7 +329,7 @@ ALTER TABLE ONLY public.store
 --
 
 ALTER TABLE ONLY public.thread
-    ADD CONSTRAINT thread_pkey PRIMARY KEY (thread_id);
+    ADD CONSTRAINT IF NOT EXISTS thread_pkey PRIMARY KEY (thread_id);
 
 
 --
@@ -337,133 +337,133 @@ ALTER TABLE ONLY public.thread
 --
 
 ALTER TABLE ONLY public.thread_ttl
-    ADD CONSTRAINT thread_ttl_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT IF NOT EXISTS thread_ttl_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: assistant_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX assistant_created_at_idx ON public.assistant USING btree (created_at DESC);
+CREATE INDEX IF NOT EXISTS assistant_created_at_idx ON public.assistant USING btree (created_at DESC);
 
 
 --
 -- Name: assistant_graph_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX assistant_graph_id_idx ON public.assistant USING btree (graph_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS assistant_graph_id_idx ON public.assistant USING btree (graph_id, created_at DESC);
 
 
 --
 -- Name: assistant_metadata_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX assistant_metadata_idx ON public.assistant USING gin (metadata jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS assistant_metadata_idx ON public.assistant USING gin (metadata jsonb_path_ops);
 
 
 --
 -- Name: checkpoints_checkpoint_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX checkpoints_checkpoint_id_idx ON public.checkpoints USING btree (thread_id, checkpoint_id DESC);
+CREATE INDEX IF NOT EXISTS checkpoints_checkpoint_id_idx ON public.checkpoints USING btree (thread_id, checkpoint_id DESC);
 
 
 --
 -- Name: checkpoints_run_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX checkpoints_run_id_idx ON public.checkpoints USING btree (run_id);
+CREATE INDEX IF NOT EXISTS checkpoints_run_id_idx ON public.checkpoints USING btree (run_id);
 
 
 --
 -- Name: idx_store_expires_at; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX idx_store_expires_at ON public.store USING btree (expires_at) WHERE (expires_at IS NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_store_expires_at ON public.store USING btree (expires_at) WHERE (expires_at IS NOT NULL);
 
 
 --
 -- Name: idx_thread_ttl_expires_at; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX idx_thread_ttl_expires_at ON public.thread_ttl USING btree (expires_at);
+CREATE INDEX IF NOT EXISTS idx_thread_ttl_expires_at ON public.thread_ttl USING btree (expires_at);
 
 
 --
 -- Name: idx_thread_ttl_thread_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX idx_thread_ttl_thread_id ON public.thread_ttl USING btree (thread_id);
+CREATE INDEX IF NOT EXISTS idx_thread_ttl_thread_id ON public.thread_ttl USING btree (thread_id);
 
 
 --
 -- Name: idx_thread_ttl_thread_strategy; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE UNIQUE INDEX idx_thread_ttl_thread_strategy ON public.thread_ttl USING btree (thread_id, strategy);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_thread_ttl_thread_strategy ON public.thread_ttl USING btree (thread_id, strategy);
 
 
 --
 -- Name: run_assistant_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX run_assistant_id_idx ON public.run USING btree (assistant_id);
+CREATE INDEX IF NOT EXISTS run_assistant_id_idx ON public.run USING btree (assistant_id);
 
 
 --
 -- Name: run_metadata_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX run_metadata_idx ON public.run USING gin (thread_id, metadata jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS run_metadata_idx ON public.run USING gin (thread_id, metadata jsonb_path_ops);
 
 
 --
 -- Name: run_pending_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX run_pending_idx ON public.run USING btree (created_at) WHERE (status = 'pending'::text);
+CREATE INDEX IF NOT EXISTS run_pending_idx ON public.run USING btree (created_at) WHERE (status = 'pending'::text);
 
 
 --
 -- Name: run_thread_id_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX run_thread_id_status_idx ON public.run USING btree (thread_id, status);
+CREATE INDEX IF NOT EXISTS run_thread_id_status_idx ON public.run USING btree (thread_id, status);
 
 
 --
 -- Name: store_prefix_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX store_prefix_idx ON public.store USING btree (prefix text_pattern_ops);
+CREATE INDEX IF NOT EXISTS store_prefix_idx ON public.store USING btree (prefix text_pattern_ops);
 
 
 --
 -- Name: thread_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX thread_created_at_idx ON public.thread USING btree (created_at DESC);
+CREATE INDEX IF NOT EXISTS thread_created_at_idx ON public.thread USING btree (created_at DESC);
 
 
 --
 -- Name: thread_metadata_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX thread_metadata_idx ON public.thread USING gin (metadata jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS thread_metadata_idx ON public.thread USING gin (metadata jsonb_path_ops);
 
 
 --
 -- Name: thread_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX thread_status_idx ON public.thread USING btree (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS thread_status_idx ON public.thread USING btree (status, created_at DESC);
 
 
 --
 -- Name: thread_values_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX thread_values_idx ON public.thread USING gin ("values" jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS thread_values_idx ON public.thread USING gin ("values" jsonb_path_ops);
 
 
 --
@@ -471,7 +471,7 @@ CREATE INDEX thread_values_idx ON public.thread USING gin ("values" jsonb_path_o
 --
 
 ALTER TABLE ONLY public.assistant_versions
-    ADD CONSTRAINT assistant_versions_assistant_id_fkey FOREIGN KEY (assistant_id) REFERENCES public.assistant(assistant_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS assistant_versions_assistant_id_fkey FOREIGN KEY (assistant_id) REFERENCES public.assistant(assistant_id) ON DELETE CASCADE;
 
 
 --
@@ -479,7 +479,7 @@ ALTER TABLE ONLY public.assistant_versions
 --
 
 ALTER TABLE ONLY public.checkpoint_blobs
-    ADD CONSTRAINT checkpoint_blobs_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS checkpoint_blobs_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
 
 
 --
@@ -487,7 +487,7 @@ ALTER TABLE ONLY public.checkpoint_blobs
 --
 
 ALTER TABLE ONLY public.checkpoint_writes
-    ADD CONSTRAINT checkpoint_writes_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS checkpoint_writes_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
 
 
 --
@@ -495,7 +495,7 @@ ALTER TABLE ONLY public.checkpoint_writes
 --
 
 ALTER TABLE ONLY public.checkpoints
-    ADD CONSTRAINT checkpoints_run_id_fkey FOREIGN KEY (run_id) REFERENCES public.run(run_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS checkpoints_run_id_fkey FOREIGN KEY (run_id) REFERENCES public.run(run_id) ON DELETE CASCADE;
 
 
 --
@@ -503,7 +503,7 @@ ALTER TABLE ONLY public.checkpoints
 --
 
 ALTER TABLE ONLY public.checkpoints
-    ADD CONSTRAINT checkpoints_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS checkpoints_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
 
 
 --
@@ -511,7 +511,7 @@ ALTER TABLE ONLY public.checkpoints
 --
 
 ALTER TABLE ONLY public.cron
-    ADD CONSTRAINT cron_assistant_id_fkey FOREIGN KEY (assistant_id) REFERENCES public.assistant(assistant_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS cron_assistant_id_fkey FOREIGN KEY (assistant_id) REFERENCES public.assistant(assistant_id) ON DELETE CASCADE;
 
 
 --
@@ -519,7 +519,7 @@ ALTER TABLE ONLY public.cron
 --
 
 ALTER TABLE ONLY public.cron
-    ADD CONSTRAINT cron_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS cron_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
 
 
 --
@@ -527,7 +527,7 @@ ALTER TABLE ONLY public.cron
 --
 
 ALTER TABLE ONLY public.run
-    ADD CONSTRAINT run_assistant_id_fkey FOREIGN KEY (assistant_id) REFERENCES public.assistant(assistant_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS run_assistant_id_fkey FOREIGN KEY (assistant_id) REFERENCES public.assistant(assistant_id) ON DELETE CASCADE;
 
 
 --
@@ -535,7 +535,7 @@ ALTER TABLE ONLY public.run
 --
 
 ALTER TABLE ONLY public.run
-    ADD CONSTRAINT run_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS run_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
 
 
 --
@@ -543,7 +543,7 @@ ALTER TABLE ONLY public.run
 --
 
 ALTER TABLE ONLY public.thread_ttl
-    ADD CONSTRAINT thread_ttl_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
+    ADD CONSTRAINT IF NOT EXISTS thread_ttl_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.thread(thread_id) ON DELETE CASCADE;
 
 
 --
